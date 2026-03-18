@@ -1,5 +1,5 @@
 ---
-title: 实习生的React学习日记 - 从Vue小白到React新手
+title: 从Vue到React，React学习Day1
 date: 2026-02-01
 tags: [React, Vue, 前端, 实习, 学习笔记]
 categories: React
@@ -10,6 +10,7 @@ categories: React
 ## 今天开始学React
 
 作为一个学习了一年多的前端小白，之前一直用的是Vue，今天终于开始学React了。
+
 ## 第一天的感受：
 
 刚打开React的文档，看到JSX的时候有点懵，这是什么东西？直接在JavaScript里写HTML？感觉好神奇，又有点奇怪。不过看了几个例子后，好像慢慢有点明白了。
@@ -111,4 +112,3 @@ const focusInput = () => {
 2. 写了第一个React组件
 3. 理解了useState、useEffect、useRef的基本用法
 4. 对比着Vue，慢慢理解了React的逻辑
-
