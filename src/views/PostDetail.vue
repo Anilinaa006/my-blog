@@ -115,6 +115,59 @@ onMounted(() => {
 
 .page-header {
   margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.page-header .el-page-header__left {
+  display: flex;
+  align-items: center;
+}
+
+.page-header .el-page-header__back {
+  font-size: 1rem;
+  color: #666;
+  transition: all 0.3s ease;
+  margin-right: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.page-header .el-page-header__back:hover {
+  color: #409eff;
+  background-color: #ecf5ff;
+}
+
+.page-header .el-page-header__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+/* 暗黑模式 */
+.dark .page-header {
+  border-bottom: 1px solid #303030;
+}
+
+.dark .page-header .el-page-header__back {
+  color: #c0c4cc;
+}
+
+.dark .page-header .el-page-header__back:hover {
+  color: #409eff;
+  background-color: rgba(64, 158, 255, 0.1);
+}
+
+.dark .page-header .el-page-header__title {
+  color: #e0e0e0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .page-header .el-page-header__title {
+    font-size: 1.2rem;
+  }
 }
 
 .post-card {

@@ -16,7 +16,7 @@
       <div class="post-meta">
         <el-tag size="small" type="info">{{ formatDate(post.date) }}</el-tag>
         <span class="post-reading-time"
-          >{{ Math.ceil(post.excerpt.length / 500) }} 分钟阅读</span
+          >阅读时间: {{ Math.ceil(post.excerpt.length / 500) }} 分钟</span
         >
       </div>
       <div class="post-excerpt" v-if="post.excerpt">

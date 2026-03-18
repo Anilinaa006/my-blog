@@ -1,7 +1,7 @@
 <template>
   <footer class="footer">
     <div class="container">
-      <p class="copyright">© 2024 My Blog. All rights reserved.</p>
+      <p class="copyright">© 2026 My Blog. All rights reserved.</p>
       <p class="powered">Powered by Vue 3 & Element Plus</p>
     </div>
   </footer>
