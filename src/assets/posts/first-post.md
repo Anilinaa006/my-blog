@@ -2,7 +2,7 @@
 title: 我的第一篇博客
 date: 2026-01-01
 tags: [Vue, 前端, 学习笔记]
-categories: 技术学习
+categories: 其他
 ---
 
 # 欢迎来到我的博客

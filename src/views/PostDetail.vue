@@ -20,7 +20,7 @@
                 <div class="post-reading-time">
                   <el-icon><Timer /></el-icon>
                   <span
-                    >{{ Math.ceil(post.content.length / 500) }} 分钟阅读</span
+                    >{{ Math.ceil(post.contentLength / 500) }} 分钟阅读</span
                   >
                 </div>
               </div>
@@ -73,6 +73,7 @@ const loadPost = async () => {
       title: metadata.title,
       date: metadata.date,
       content: parseMarkdown(metadata.content),
+      contentLength: metadata.content.length,
     };
   } catch (error) {
     console.error("加载文章失败:", error);

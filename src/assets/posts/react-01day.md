@@ -2,7 +2,7 @@
 title: 实习生的React学习日记 - 从Vue小白到React新手
 date: 2026-02-01
 tags: [React, Vue, 前端, 实习, 学习笔记]
-categories: 技术学习
+categories: React
 ---
 
 # React学习日记 - 从Vue小白到React新手
