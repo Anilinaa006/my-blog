@@ -1,6 +1,6 @@
 ---
 title: 从Vue到React，React学习Day1
-date: 2026-02-01
+date: 2026-03-01
 tags: [React, Vue, 前端, 实习, 学习笔记]
 categories: React
 ---
@@ -13,7 +13,8 @@ categories: React
 
 ## 第一天的感受：
 
-刚打开React的文档，看到JSX的时候有点懵，这是什么东西？直接在JavaScript里写HTML？感觉好神奇，又有点奇怪。不过看了几个例子后，好像慢慢有点明白了。
+之前稍微的看过React的文档，看到JSX的时候有点懵，这是什么东西？直接在JavaScript里写HTML？感觉好神奇，又有点奇怪。不过看了几个例子后，好像慢慢有点明白了。
+然后就去网上找了一些网课资源看，想了解的更透彻，这可以算是学习react的第一天
 
 ### 和Vue的相似点
 

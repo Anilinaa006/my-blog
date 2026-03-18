@@ -1,6 +1,6 @@
 ---
 title: 从Vue到React，React学习Day2
-date: 2026-03-19
+date: 2026-03-02
 tags: [React, 前端, 学习笔记, 组件通信, Redux]
 categories: React
 ---
