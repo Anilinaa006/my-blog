@@ -8,6 +8,6 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["**/*.md"],
   },
-  // 核心新增：指定 GitHub Pages 子路径（和仓库名一致）
-  base: "/my-blog/",
+  // 核心修改：改用相对路径（彻底解决子路径适配问题）
+  base: "./",
 });
