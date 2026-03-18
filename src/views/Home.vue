@@ -34,6 +34,7 @@ const loadPosts = async () => {
         title: metadata.title,
         date: metadata.date,
         excerpt: metadata.content.substring(0, 150) + "...",
+        contentLength: metadata.content.length,
       };
     });
 
