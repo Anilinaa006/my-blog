@@ -1,7 +1,7 @@
 <template>
   <el-dropdown trigger="click" @command="handleThemeChange">
     <el-button circle>
-      <el-icon v-if="isDark">
+      <el-icon v-if="!isDark">
         <Sunny />
       </el-icon>
       <el-icon v-else>
@@ -18,27 +18,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { Moon, Sunny } from '@element-plus/icons-vue';
+import { ref, onMounted, watch } from "vue";
+import { Moon, Sunny } from "@element-plus/icons-vue";
 
 const isDark = ref(false);
 
 const handleThemeChange = (command) => {
-  if (command === 'dark') {
-    document.documentElement.classList.add('dark');
+  if (command === "dark") {
+    document.documentElement.classList.add("dark");
     isDark.value = true;
-    localStorage.setItem('theme', 'dark');
+    localStorage.setItem("theme", "dark");
   } else {
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.remove("dark");
     isDark.value = false;
-    localStorage.setItem('theme', 'light');
+    localStorage.setItem("theme", "light");
   }
 };
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    handleThemeChange('dark');
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark") {
+    handleThemeChange("dark");
   }
 });
 </script>

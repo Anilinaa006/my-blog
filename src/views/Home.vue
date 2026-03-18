@@ -58,18 +58,32 @@ onMounted(() => {
 .home {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 3rem 1rem;
 }
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.page-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #409eff, #69c0ff);
+  border-radius: 3px;
 }
 
 .page-header .el-page-header__content {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 2rem;
+  font-weight: 700;
   color: #333;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
 }
 
 .dark .page-header .el-page-header__content {
@@ -77,14 +91,44 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 2rem;
+  font-weight: 700;
   color: #333;
-  margin-bottom: 2rem;
-  transition: color 0.3s ease;
+  margin-bottom: 3rem;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.page-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #409eff, #69c0ff);
+  border-radius: 3px;
 }
 
 .dark .page-title {
   color: #e0e0e0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .home {
+    padding: 2rem 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .page-header .el-page-header__content {
+    font-size: 1.5rem;
+  }
 }
 </style>
