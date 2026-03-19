@@ -1,5 +1,5 @@
 <template>
-  <header class="header">
+  <header class="header" :class="{ 'header-scrolled': isScrolled }">
     <div class="container">
       <h1 class="logo">
         <router-link to="/">FrontendDiary</router-link>
@@ -28,6 +28,7 @@ import ThemeToggle from "./ThemeToggle.vue";
 
 const isMobile = ref(false);
 const isNavOpen = ref(false);
+const isScrolled = ref(false);
 
 const toggleNav = () => {
   isNavOpen.value = !isNavOpen.value;
@@ -40,26 +41,49 @@ const checkMobile = () => {
   }
 };
 
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 100;
+};
+
 onMounted(() => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
+  window.addEventListener("scroll", handleScroll);
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", checkMobile);
+  window.removeEventListener("scroll", handleScroll);
 });
 </script>
 
 <style scoped>
 .header {
-  background-color: #f8f9fa;
+  background-color: rgba(248, 249, 250, 0.95);
   border-bottom: 1px solid #e9ecef;
   padding: 1rem 0;
+  transition: all 0.3s ease;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  backdrop-filter: blur(10px);
 }
 
 .dark .header {
-  background-color: #1f2329;
+  background-color: rgba(31, 35, 41, 0.95);
   border-bottom: 1px solid #303030;
+}
+
+/* 吸附效果 */
+.header-scrolled {
+  padding: 0.8rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: rgba(248, 249, 250, 0.98);
+}
+
+.dark .header-scrolled {
+  background-color: rgba(31, 35, 41, 0.98);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .container {
