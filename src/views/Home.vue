@@ -50,16 +50,26 @@ const selectedCategory = ref("all");
 
 const loadPosts = async () => {
   try {
-    // 手动导入文章列表
-    const postModules = import.meta.glob("../assets/posts/*.md", {
-      as: "raw",
-      eager: true,
-    });
+    // 静态导入文章列表
+    const postModules = {
+      "../assets/posts/first-post.md":
+        await import("../assets/posts/first-post.md?raw"),
+      "../assets/posts/js的闭包.md":
+        await import("../assets/posts/js的闭包.md?raw"),
+      "../assets/posts/bfc.md": await import("../assets/posts/bfc.md?raw"),
+      "../assets/posts/常见的css问题.md":
+        await import("../assets/posts/常见的css问题.md?raw"),
+      "../assets/posts/react-01day.md":
+        await import("../assets/posts/react-01day.md?raw"),
+      "../assets/posts/react-day2.md":
+        await import("../assets/posts/react-day2.md?raw"),
+    };
 
     console.log("Loaded post modules:", Object.keys(postModules));
 
-    const postList = Object.entries(postModules).map(([path, content]) => {
+    const postList = Object.entries(postModules).map(([path, module]) => {
       console.log("Processing file:", path);
+      const content = module.default;
       const metadata = getPostMetadata(content);
       const id = path.split("/").pop().replace(".md", "");
       console.log("Extracted id:", id);
