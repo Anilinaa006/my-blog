@@ -2,7 +2,7 @@
   <header class="header">
     <div class="container">
       <h1 class="logo">
-        <router-link to="/">My Blog</router-link>
+        <router-link to="/">FrontendDiary</router-link>
       </h1>
       <div class="header-actions">
         <nav
