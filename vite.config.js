@@ -8,6 +8,5 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["**/*.md"],
   },
-  // 核心修改：改用相对路径（彻底解决子路径适配问题）
-  base: "./",
+  base: "/my-blog/",
 });
