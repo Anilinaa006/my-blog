@@ -22,7 +22,7 @@
                 <p>我是东华理工大学软件工程专业的一名大三学生</p>
                 <p>我喜欢探索新的技术，并且对前端开发有浓厚的兴趣。</p>
               </el-descriptions-item>
-              <el-descriptions-item label="博客介绍">
+              <el-descriptions-item label="博客说明">
                 <p>欢迎来到我的个人博客！</p>
                 <p>我是一名前端开发者，热爱技术，喜欢分享。</p>
                 <p>

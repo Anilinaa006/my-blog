@@ -10,7 +10,8 @@
           :class="{ 'nav-mobile': isMobile, 'nav-open': isNavOpen }"
         >
           <router-link to="/" class="nav-link">首页</router-link>
-          <router-link to="/about" class="nav-link">关于</router-link>
+          <router-link to="/about" class="nav-link">关于我</router-link>
+          <router-link to="/blog-intro" class="nav-link">博客介绍</router-link>
         </nav>
         <button class="mobile-menu-btn" @click="toggleNav" v-if="isMobile">
           <span class="menu-icon"></span>
