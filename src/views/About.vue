@@ -121,4 +121,38 @@
 .dark .about-content p {
   color: #e0e0e0;
 }
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .about {
+    padding: 1.5rem 1rem;
+  }
+
+  .page-title {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .about-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .about-title {
+    font-size: 1.3rem;
+  }
+
+  .about-content {
+    font-size: 0.95rem;
+  }
+
+  .about-content p {
+    margin-bottom: 0.8rem;
+  }
+
+  .about-footer {
+    margin-top: 1.5rem;
+  }
+}
 </style>

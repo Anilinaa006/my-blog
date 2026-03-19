@@ -41,4 +41,19 @@
 .dark .powered {
   color: #909399;
 }
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .footer {
+    padding: 1.5rem 0;
+  }
+
+  .copyright {
+    font-size: 0.9rem;
+  }
+
+  .powered {
+    font-size: 0.8rem;
+  }
+}
 </style>

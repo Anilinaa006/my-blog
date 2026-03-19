@@ -82,8 +82,37 @@ watch(
 .post-list {
   margin-top: 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 767px) {
+  .post-list {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    margin-top: 1.5rem;
+  }
+
+  .post-title {
+    font-size: 1.1rem;
+  }
+
+  .post-excerpt {
+    font-size: 0.9rem;
+    -webkit-line-clamp: 3;
+  }
+
+  .post-card {
+    border-radius: 8px;
+  }
+
+  .post-footer {
+    margin-top: 1rem;
+  }
+
+  .post-meta {
+    font-size: 0.8rem;
+  }
 }
 
 .post-card {
