@@ -162,11 +162,15 @@ onMounted(() => {
 }
 
 .post-card {
-  transition: box-shadow 0.3s ease;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .post-card:hover {
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-2px);
 }
 
 .post-header {
@@ -174,8 +178,14 @@ onMounted(() => {
   flex-direction: column;
   align-items: flex-start;
   margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
+  padding: 2rem 1.5rem 1.5rem;
   border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.dark .post-header {
+  background: linear-gradient(135deg, #1f2329 0%, #2a2e35 100%);
+  border-bottom-color: #303030;
 }
 
 .post-title {
@@ -186,26 +196,76 @@ onMounted(() => {
   line-height: 1.3;
   font-weight: 700;
   letter-spacing: 0.5px;
+  text-align: center;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+@media (max-width: 768px) {
+  .post-title {
+    font-size: 1.8rem;
+    padding: 0 0.5rem;
+  }
+}
+
+.dark .post-title {
+  color: #e0e0e0;
 }
 
 .post-meta {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
   font-size: 0.9rem;
   color: #666;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
 }
 
 .post-date {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  background-color: #f8f9fa;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .post-reading-time {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  background-color: #f8f9fa;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+  .post-meta {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .post-date,
+  .post-reading-time {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.dark .post-meta {
+  color: #909399;
+}
+
+.dark .post-date,
+.dark .post-reading-time {
+  background-color: #303030;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .post-body {
@@ -214,6 +274,7 @@ onMounted(() => {
   margin: 2rem 0;
   transition: color 0.3s ease;
   font-size: 1.05rem;
+  padding: 0 1.5rem;
 }
 
 .post-body h2 {
@@ -222,9 +283,21 @@ onMounted(() => {
   font-size: 1.8rem;
   color: #333;
   transition: color 0.3s ease;
-  font-weight: 600;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e9ecef;
+  font-weight: 700;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid #409eff;
+  position: relative;
+}
+
+.post-body h2::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 80px;
+  height: 2px;
+  background-color: #409eff;
+  border-radius: 2px;
 }
 
 .post-body h3 {
@@ -234,11 +307,14 @@ onMounted(() => {
   color: #333;
   transition: color 0.3s ease;
   font-weight: 600;
+  padding-left: 1rem;
+  border-left: 4px solid #409eff;
 }
 
 .post-body p {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.8rem;
   text-align: justify;
+  line-height: 1.8;
 }
 
 .post-body code {
@@ -247,6 +323,7 @@ onMounted(() => {
   border-radius: 4px;
   font-family: "Courier New", Courier, monospace;
   font-size: 0.9em;
+  color: #e74c3c;
 }
 
 .post-body pre {
@@ -254,8 +331,9 @@ onMounted(() => {
   padding: 1.5rem;
   border-radius: 8px;
   overflow-x: auto;
-  margin-bottom: 1.5rem;
+  margin: 2rem 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #409eff;
 }
 
 .post-body pre code {
@@ -263,25 +341,147 @@ onMounted(() => {
   padding: 0;
   font-size: 0.9rem;
   line-height: 1.5;
+  color: #333;
 }
 
 .post-body ul,
 .post-body ol {
-  margin-bottom: 1.5rem;
-  padding-left: 2rem;
+  margin: 1.5rem 0;
+  padding-left: 2.5rem;
+}
+
+.post-body ul {
+  list-style-type: disc;
+}
+
+.post-body ol {
+  list-style-type: decimal;
 }
 
 .post-body li {
   margin-bottom: 0.8rem;
-  line-height: 1.6;
+  line-height: 1.7;
+  position: relative;
+}
+
+.post-body li::marker {
+  color: #409eff;
+  font-weight: 600;
 }
 
 .post-body img {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  margin: 2rem 0;
+  margin: 2rem auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: block;
+}
+
+/* 引用样式 */
+.post-body blockquote {
+  border-left: 4px solid #409eff;
+  margin: 2rem 0;
+  padding: 1rem 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #666;
+}
+
+/* 分隔线样式 */
+.post-body hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #409eff, transparent);
+  margin: 3rem 0;
+}
+
+/* 表格样式 */
+.post-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.post-body th,
+.post-body td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.post-body th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.post-body tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* 暗黑模式样式 */
+.dark .post-body {
+  color: #e0e0e0;
+}
+
+.dark .post-body h2 {
+  color: #e0e0e0;
+  border-bottom-color: #409eff;
+}
+
+.dark .post-body h2::after {
+  background-color: #409eff;
+}
+
+.dark .post-body h3 {
+  color: #e0e0e0;
+  border-left-color: #409eff;
+}
+
+.dark .post-body code {
+  background-color: #303030;
+  color: #ff7675;
+}
+
+.dark .post-body pre {
+  background-color: #303030;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-left-color: #409eff;
+}
+
+.dark .post-body pre code {
+  color: #e0e0e0;
+}
+
+.dark .post-body blockquote {
+  background-color: #303030;
+  color: #b0b0b0;
+}
+
+.dark .post-body hr {
+  background: linear-gradient(to right, transparent, #409eff, transparent);
+}
+
+.dark .post-body table {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .post-body th {
+  background-color: #303030;
+  color: #e0e0e0;
+}
+
+.dark .post-body td {
+  border-bottom-color: #404040;
+}
+
+.dark .post-body tr:hover {
+  background-color: #303030;
 }
 
 .post-footer {
