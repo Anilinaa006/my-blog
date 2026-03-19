@@ -6,6 +6,7 @@ const postModules = {
   "常见的css问题": () => import("../assets/posts/常见的css问题.md?raw"),
   "react-01day": () => import("../assets/posts/react-01day.md?raw"),
   "react-day2": () => import("../assets/posts/react-day2.md?raw"),
+  "react-day3": () => import("../assets/posts/react-day3.md?raw"),
   "关于部署纯前端静态网站": () => import("../assets/posts/关于部署纯前端静态网站.md?raw"),
 };
 
