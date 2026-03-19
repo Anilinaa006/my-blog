@@ -53,20 +53,23 @@ const post = ref(null);
 const loadPost = async () => {
   try {
     const postId = route.params.id;
-    const postModules = import.meta.glob("../assets/posts/*.md", {
-      as: "raw",
-      eager: true,
-    });
 
-    const postPath = Object.keys(postModules).find((path) =>
-      path.includes(postId),
-    );
+    // 静态导入文章列表
+    const postModules = {
+      "first-post": await import("../assets/posts/first-post.md?raw"),
+      js的闭包: await import("../assets/posts/js的闭包.md?raw"),
+      bfc: await import("../assets/posts/bfc.md?raw"),
+      常见的css问题: await import("../assets/posts/常见的css问题.md?raw"),
+      "react-01day": await import("../assets/posts/react-01day.md?raw"),
+      "react-day2": await import("../assets/posts/react-day2.md?raw"),
+    };
 
-    if (!postPath) {
+    const postModule = postModules[postId];
+    if (!postModule) {
       throw new Error("文章不存在");
     }
 
-    const content = postModules[postPath];
+    const content = postModule.default;
     const metadata = getPostMetadata(content);
 
     post.value = {
