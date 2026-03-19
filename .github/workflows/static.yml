@@ -31,34 +31,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       # 1. 新增：安装 Node.js 环境（必须，否则无法执行 npm 命令）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20  # 指定 Node 版本，和你本地一致即可
-          cache: 'npm'      # 缓存依赖，加速部署
-      
+          node-version: 20 # 指定 Node 版本，和你本地一致即可
+          cache: "npm" # 缓存依赖，加速部署
+
       # 2. 新增：安装项目依赖（必须，否则无法打包）
       - name: Install dependencies
         run: npm install
-      
+
       # 3. 新增：执行打包命令（必须，生成 dist 文件夹）
       - name: Build project
         run: npm run build
-      
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-        # 新增：指定静态生成器为 vite，适配路径
-        with:
-          static_site_generator: vite
-      
+
+      # 👇 删掉下面这4行（Setup Pages 步骤）👇
+      # - name: Setup Pages
+      #   uses: actions/configure-pages@v5
+      #   with:
+      #     static_site_generator: vite
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # 你这里 path: './dist' 是对的，不用改！
-          path: './dist'
-      
+          path: "./dist"
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
