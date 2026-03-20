@@ -7,6 +7,10 @@ const postModules = {
   "react-01day": () => import("../assets/posts/react-01day.md?raw"),
   "react-day2": () => import("../assets/posts/react-day2.md?raw"),
   "react-day3": () => import("../assets/posts/react-day3.md?raw"),
+  "Vue2和Vue3区别": () => import("../assets/posts/Vue2和Vue3区别.md?raw"),
+  "防抖": () => import("../assets/posts/防抖.md?raw"),
+  "节流": () => import("../assets/posts/节流.md?raw"),
+  "flex": () => import("../assets/posts/flex.md?raw"),
   "关于部署纯前端静态网站": () => import("../assets/posts/关于部署纯前端静态网站.md?raw"),
 };
 
