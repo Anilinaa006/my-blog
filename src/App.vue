@@ -78,5 +78,6 @@ body {
 
 .main {
   flex: 1;
+  padding-top: 80px;
 }
 </style>

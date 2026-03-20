@@ -9,9 +9,9 @@
           class="nav"
           :class="{ 'nav-mobile': isMobile, 'nav-open': isNavOpen }"
         >
-          <router-link to="/" class="nav-link">首页</router-link>
-          <router-link to="/about" class="nav-link">关于我</router-link>
-          <router-link to="/blog-intro" class="nav-link">博客介绍</router-link>
+          <router-link to="/" class="nav-link" @click="closeNav">首页</router-link>
+          <router-link to="/about" class="nav-link" @click="closeNav">关于我</router-link>
+          <router-link to="/blog-intro" class="nav-link" @click="closeNav">博客介绍</router-link>
         </nav>
         <button class="mobile-menu-btn" @click="toggleNav" v-if="isMobile">
           <span class="menu-icon"></span>
@@ -32,6 +32,12 @@ const isScrolled = ref(false);
 
 const toggleNav = () => {
   isNavOpen.value = !isNavOpen.value;
+};
+
+const closeNav = () => {
+  if (isMobile.value) {
+    isNavOpen.value = false;
+  }
 };
 
 const checkMobile = () => {
@@ -63,8 +69,10 @@ onUnmounted(() => {
   border-bottom: 1px solid #e9ecef;
   padding: 1rem 0;
   transition: all 0.3s ease;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 999;
   backdrop-filter: blur(10px);
 }
@@ -204,14 +212,14 @@ onUnmounted(() => {
   position: fixed;
   top: 0;
   right: -100%;
-  width: 80%;
-  max-width: 300px;
+  width: 70%;
+  max-width: 280px;
   height: 100vh;
   background-color: #f8f9fa;
   flex-direction: column;
   align-items: flex-start;
   padding: 2rem 1rem;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
   transition: right 0.3s ease;
   z-index: 1000;
 }
