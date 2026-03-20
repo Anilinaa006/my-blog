@@ -11,6 +11,7 @@ const postModules = {
   "防抖": () => import("../assets/posts/防抖.md?raw"),
   "节流": () => import("../assets/posts/节流.md?raw"),
   "flex": () => import("../assets/posts/flex.md?raw"),
+  "prpmise": () => import("../assets/posts/prpmise.md?raw"),
   "关于部署纯前端静态网站": () => import("../assets/posts/关于部署纯前端静态网站.md?raw"),
 };
 

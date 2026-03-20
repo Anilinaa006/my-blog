@@ -2,7 +2,7 @@
 title: 深入理解JavaScript闭包
 date: 2026-02-10
 tags: [JavaScript, 前端, 闭包, 学习笔记]
-categories: JS21
+categories: JavaScript
 ---
 
 # 如何理解JavaScript闭包
