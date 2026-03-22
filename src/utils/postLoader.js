@@ -7,6 +7,8 @@ const postModules = {
   "react-01day": () => import("../assets/posts/react-01day.md?raw"),
   "react-day2": () => import("../assets/posts/react-day2.md?raw"),
   "react-day3": () => import("../assets/posts/react-day3.md?raw"),
+  "react-day4": () => import("../assets/posts/react-day4.md?raw"),
+  "react-day5": () => import("../assets/posts/react-day5.md?raw"),
   "Vue2和Vue3区别": () => import("../assets/posts/Vue2和Vue3区别.md?raw"),
   "防抖": () => import("../assets/posts/防抖.md?raw"),
   "节流": () => import("../assets/posts/节流.md?raw"),
@@ -18,7 +20,7 @@ const postModules = {
 // 获取所有文章列表
 export const getAllPosts = async () => {
   const postList = [];
-  
+
   for (const [id, importFn] of Object.entries(postModules)) {
     try {
       const module = await importFn();
@@ -28,7 +30,7 @@ export const getAllPosts = async () => {
       console.error(`加载文章 ${id} 失败:`, error);
     }
   }
-  
+
   return postList;
 };
 
@@ -38,7 +40,7 @@ export const getPostById = async (id) => {
   if (!importFn) {
     throw new Error("文章不存在");
   }
-  
+
   try {
     const module = await importFn();
     return module.default;

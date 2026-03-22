@@ -121,6 +121,44 @@ const resolvedPromise = Promise.resolve("成功");
 const rejectedPromise = Promise.reject("失败");
 ```
 
+### Promise.allSettled()
+
+返回所有Promise的结果，无论成功或失败：
+
+```javascript
+Promise.allSettled([
+  fetch("https://api.example.com/data1"),
+  fetch("https://api.example.com/data2"),
+  fetch("https://api.example.com/data3"),
+]).then((results) => {
+  results.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      console.log(`请求${index + 1}成功:`, result.value);
+    } else {
+      console.log(`请求${index + 1}失败:`, result.reason);
+    }
+  });
+});
+```
+
+### Promise.any()
+
+返回第一个成功的Promise结果，如果所有Promise都失败则返回错误：
+
+```javascript
+Promise.any([
+  fetch("https://api.example.com/data1"),
+  fetch("https://api.example.com/data2"),
+  fetch("https://api.example.com/data3"),
+])
+  .then((response) => {
+    console.log("第一个成功的请求:", response);
+  })
+  .catch((error) => {
+    console.error("所有请求都失败:", error);
+  });
+```
+
 ## async/await 与 Promise
 
 async/await是Promise的语法糖，使异步代码更像同步代码：
@@ -167,10 +205,101 @@ async function processData() {
 
 ## Promise的应用场景
 
-1. **网络请求**：如fetch API
-2. **文件操作**：如读取文件、写入文件
-3. **定时器**：如setTimeout的Promise封装
-4. **复杂的异步流程控制**：如并行请求、串行请求
+### 1. 网络请求
+
+```javascript
+// 使用fetch API获取数据
+async function fetchUserData(userId) {
+  try {
+    const response = await fetch(`https://api.example.com/users/${userId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const userData = await response.json();
+    return userData;
+  } catch (error) {
+    console.error('获取用户数据失败:', error);
+    throw error;
+  }
+}
+```
+
+### 2. 文件操作
+
+```javascript
+// 封装fs模块的Promise版本
+const fs = require('fs').promises;
+
+async function readFileContent(filePath) {
+  try {
+    const content = await fs.readFile(filePath, 'utf8');
+    return content;
+  } catch (error) {
+    console.error('读取文件失败:', error);
+    throw error;
+  }
+}
+```
+
+### 3. 定时器
+
+```javascript
+// 封装setTimeout为Promise
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// 使用示例
+async function runWithDelay() {
+  console.log('开始');
+  await delay(1000);
+  console.log('1秒后');
+  await delay(2000);
+  console.log('又过了2秒');
+}
+```
+
+### 4. 复杂的异步流程控制
+
+```javascript
+// 并行执行多个请求
+async function fetchAllData() {
+  try {
+    const [userData, postsData, commentsData] = await Promise.all([
+      fetch('https://api.example.com/users'),
+      fetch('https://api.example.com/posts'),
+      fetch('https://api.example.com/comments')
+    ]);
+    
+    const [users, posts, comments] = await Promise.all([
+      userData.json(),
+      postsData.json(),
+      commentsData.json()
+    ]);
+    
+    return { users, posts, comments };
+  } catch (error) {
+    console.error('获取数据失败:', error);
+    throw error;
+  }
+}
+
+// 串行执行请求
+async function fetchDataSequentially() {
+  try {
+    const users = await fetch('https://api.example.com/users').then(res => res.json());
+    const firstUserId = users[0].id;
+    const userPosts = await fetch(`https://api.example.com/users/${firstUserId}/posts`).then(res => res.json());
+    const firstPostId = userPosts[0].id;
+    const postComments = await fetch(`https://api.example.com/posts/${firstPostId}/comments`).then(res => res.json());
+    
+    return { users, userPosts, postComments };
+  } catch (error) {
+    console.error('获取数据失败:', error);
+    throw error;
+  }
+}
+```
 
 ## Promise的实现原理
 
@@ -250,4 +379,3 @@ class MyPromise {
 Promise是JavaScript中处理异步操作的强大工具，它通过提供清晰的API和链式调用，解决了回调地狱的问题。结合async/await语法，使得异步代码更加简洁易读。
 
 掌握Promise的使用方法和原理，对于编写高质量的JavaScript代码至关重要。在实际开发中，我们应该合理利用Promise的各种方法，编写更加健壮、可维护的异步代码。
-
