@@ -1,12 +1,18 @@
 <template>
   <el-container class="post-detail-container">
+    <!-- 固定导航栏 -->
+    <div class="fixed-navbar">
+      <div class="navbar-content">
+        <el-button class="back-button" @click="handleBack" plain>
+          <el-icon><ArrowLeft /></el-icon>
+          <span>返回</span>
+        </el-button>
+        <h2 class="navbar-title">{{ post ? post.title : "文章详情" }}</h2>
+        <div class="navbar-placeholder"></div>
+      </div>
+    </div>
     <el-main>
       <div class="post-detail">
-        <el-page-header
-          class="page-header"
-          @back="handleBack"
-          content="文章详情"
-        />
         <el-card v-if="post" class="post-card" shadow="hover">
           <template #header>
             <div class="post-header">
@@ -29,7 +35,7 @@
           <div class="post-body" v-html="post.content"></div>
           <div class="post-footer">
             <el-button class="back-btn" @click="handleBack">
-              <el-icon class="el-icon--left"><arrow-left /></el-icon>
+              <el-icon class="el-icon--left"><ArrowLeft /></el-icon>
               返回列表
             </el-button>
           </div>
@@ -85,10 +91,13 @@ const formatDate = (dateString) => {
 };
 
 const handleBack = () => {
+  console.log("点击返回按钮");
   router.push("/");
 };
 
 onMounted(() => {
+  // 滚动到页面顶部
+  window.scrollTo(0, 0);
   loadPost();
 });
 </script>
@@ -96,12 +105,86 @@ onMounted(() => {
 <style scoped>
 .post-detail-container {
   min-height: calc(100vh - 60px);
+  position: relative;
+}
+
+/* 固定导航栏 */
+.fixed-navbar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.dark .fixed-navbar {
+  background-color: rgba(26, 26, 26, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #409eff;
+  border-color: #409eff;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #ecf5ff;
+  border-color: #66b1ff;
+  color: #66b1ff;
+}
+
+.dark .back-button {
+  color: #409eff;
+  border-color: #409eff;
+}
+
+.dark .back-button:hover {
+  background-color: rgba(64, 158, 255, 0.1);
+  border-color: #66b1ff;
+  color: #66b1ff;
+}
+
+.navbar-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: center;
+  margin: 0 1rem;
+}
+
+.dark .navbar-title {
+  color: #e0e0e0;
+}
+
+.navbar-placeholder {
+  width: 80px;
 }
 
 .post-detail {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 80px 1rem 2rem;
 }
 
 .page-header {
@@ -594,6 +677,19 @@ onMounted(() => {
 
   .back-btn {
     padding: 0.5rem 1.2rem;
+  }
+
+  .navbar-content {
+    padding: 0.8rem 1rem;
+  }
+
+  .navbar-title {
+    font-size: 0.9rem;
+  }
+
+  .back-button {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
   }
 }
 </style>

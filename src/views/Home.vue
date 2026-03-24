@@ -39,26 +39,65 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import PostList from "../components/PostList.vue";
 import { getPostMetadata } from "../utils/markdown.js";
 import { getAllPosts } from "../utils/postLoader.js";
 
+const router = useRouter();
+const route = useRoute();
 const posts = ref([]);
 const originalPosts = ref([]);
 const loading = ref(true);
 const sortOrder = ref("desc");
 const selectedCategory = ref("all");
 
+// 从localStorage加载保存的设置
+const loadSavedSettings = () => {
+  const savedCategory = localStorage.getItem("blogSelectedCategory");
+  const savedSortOrder = localStorage.getItem("blogSortOrder");
+
+  if (savedCategory) {
+    selectedCategory.value = savedCategory;
+  }
+
+  if (savedSortOrder) {
+    sortOrder.value = savedSortOrder;
+  }
+};
+
+// 保存设置到localStorage
+const saveSettings = () => {
+  localStorage.setItem("blogSelectedCategory", selectedCategory.value);
+  localStorage.setItem("blogSortOrder", sortOrder.value);
+};
+
+// 保存滚动位置到localStorage
+const saveScrollPosition = () => {
+  const scrollPosition = window.scrollY;
+  localStorage.setItem("blogScrollPosition", scrollPosition.toString());
+  console.log("保存滚动位置:", scrollPosition);
+};
+
+// 恢复滚动位置
+const restoreScrollPosition = () => {
+  const savedPosition = localStorage.getItem("blogScrollPosition");
+  if (savedPosition) {
+    console.log("恢复滚动位置:", savedPosition);
+    // 使用setTimeout确保DOM已经完全渲染
+    setTimeout(() => {
+      window.scrollTo(0, parseInt(savedPosition));
+    }, 100);
+  }
+};
+
 const loadPosts = async () => {
   try {
     // 使用工具函数加载所有文章
     const postContents = await getAllPosts();
 
-    console.log("Loaded post contents:", postContents.length);
-
     const postList = postContents.map(({ id, content }) => {
-      console.log("Processing post:", id);
       const metadata = getPostMetadata(content);
       return {
         id,
@@ -70,7 +109,6 @@ const loadPosts = async () => {
       };
     });
 
-    console.log("Final post list:", postList);
     originalPosts.value = postList;
     sortPosts();
   } catch (error) {
@@ -98,14 +136,53 @@ const filterPosts = () => {
   }
 
   posts.value = filteredPosts;
+  // 保存设置
+  saveSettings();
 };
 
 const sortPosts = () => {
   filterPosts();
 };
 
+// 监听设置变化并保存
+watch(selectedCategory, () => {
+  saveSettings();
+});
+
+watch(sortOrder, () => {
+  saveSettings();
+});
+
+// 监听路由变化，当路由进入首页时恢复滚动位置
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === "/") {
+      console.log("路由进入首页，恢复滚动位置");
+      restoreScrollPosition();
+    }
+  },
+);
+
 onMounted(() => {
+  // 加载保存的设置
+  loadSavedSettings();
+  // 加载文章
   loadPosts();
+
+  // 监听滚动事件，保存滚动位置
+  window.addEventListener("scroll", saveScrollPosition);
+
+  // 页面加载完成后恢复滚动位置
+  restoreScrollPosition();
+});
+
+onBeforeUnmount(() => {
+  // 组件卸载前保存滚动位置
+  console.log("组件卸载前保存滚动位置");
+  saveScrollPosition();
+  // 移除滚动事件监听器
+  window.removeEventListener("scroll", saveScrollPosition);
 });
 </script>
 
