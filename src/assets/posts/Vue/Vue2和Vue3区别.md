@@ -33,12 +33,13 @@ function defineReactive(obj, key, val) {
         // 触发更新
         trigger(obj, key);
       }
-    }
+    },
   });
 }
 ```
 
 **局限性**：
+
 - 无法检测对象属性的添加和删除
 - 无法检测数组的索引和长度变化
 - 需要深度遍历对象，性能开销较大
@@ -56,7 +57,7 @@ function reactive(target) {
       // 依赖收集
       track(target, key);
       // 递归处理嵌套对象
-      if (typeof result === 'object' && result !== null) {
+      if (typeof result === "object" && result !== null) {
         return reactive(result);
       }
       return result;
@@ -78,12 +79,13 @@ function reactive(target) {
         trigger(target, key);
       }
       return result;
-    }
+    },
   });
 }
 ```
 
 **优势**：
+
 - 可以检测对象属性的添加和删除
 - 可以检测数组的索引和长度变化
 - 不需要深度遍历对象，性能更好
@@ -101,31 +103,32 @@ export default {
   data() {
     return {
       count: 0,
-      message: 'Hello'
+      message: "Hello",
     };
   },
   methods: {
     increment() {
       this.count++;
-    }
+    },
   },
   computed: {
     doubleCount() {
       return this.count * 2;
-    }
+    },
   },
   watch: {
     count(newVal, oldVal) {
       console.log(`Count changed from ${oldVal} to ${newVal}`);
-    }
+    },
   },
   mounted() {
-    console.log('Component mounted');
-  }
+    console.log("Component mounted");
+  },
 };
 ```
 
 **局限性**：
+
 - 逻辑分散在不同选项中，难以复用
 - 大型组件代码难以维护
 - TypeScript 支持不够友好
@@ -136,44 +139,45 @@ Vue 3 引入了组合式 API，允许我们按照逻辑关注点组织代码：
 
 ```javascript
 // Vue 3 组件
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from "vue";
 
 export default {
   setup() {
     // 响应式状态
     const count = ref(0);
-    const message = ref('Hello');
-    
+    const message = ref("Hello");
+
     // 计算属性
     const doubleCount = computed(() => count.value * 2);
-    
+
     // 方法
     const increment = () => {
       count.value++;
     };
-    
+
     // 监听器
     watch(count, (newVal, oldVal) => {
       console.log(`Count changed from ${oldVal} to ${newVal}`);
     });
-    
+
     // 生命周期
     onMounted(() => {
-      console.log('Component mounted');
+      console.log("Component mounted");
     });
-    
+
     // 返回暴露给模板的内容
     return {
       count,
       message,
       doubleCount,
-      increment
+      increment,
     };
-  }
+  },
 };
 ```
 
 **优势**：
+
 - 逻辑可以按功能组织，便于维护
 - 更好的代码复用性
 - 更好的 TypeScript 支持
@@ -185,14 +189,30 @@ export default {
 
 ```javascript
 export default {
-  beforeCreate() { /* ... */ },
-  created() { /* ... */ },
-  beforeMount() { /* ... */ },
-  mounted() { /* ... */ },
-  beforeUpdate() { /* ... */ },
-  updated() { /* ... */ },
-  beforeDestroy() { /* ... */ },
-  destroyed() { /* ... */ }
+  beforeCreate() {
+    /* ... */
+  },
+  created() {
+    /* ... */
+  },
+  beforeMount() {
+    /* ... */
+  },
+  mounted() {
+    /* ... */
+  },
+  beforeUpdate() {
+    /* ... */
+  },
+  updated() {
+    /* ... */
+  },
+  beforeDestroy() {
+    /* ... */
+  },
+  destroyed() {
+    /* ... */
+  },
 };
 ```
 
@@ -201,30 +221,45 @@ export default {
 Vue 3 保留了大部分生命周期钩子，但名称有所变化，并且需要从 Vue 中导入：
 
 ```javascript
-import { 
-  onBeforeMount, 
-  onMounted, 
-  onBeforeUpdate, 
-  onUpdated, 
-  onBeforeUnmount, 
+import {
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated,
+  onBeforeUnmount,
   onUnmounted,
-  onErrorCaptured
-} from 'vue';
+  onErrorCaptured,
+} from "vue";
 
 export default {
   setup() {
-    onBeforeMount(() => { /* ... */ });
-    onMounted(() => { /* ... */ });
-    onBeforeUpdate(() => { /* ... */ });
-    onUpdated(() => { /* ... */ });
-    onBeforeUnmount(() => { /* ... */ });
-    onUnmounted(() => { /* ... */ });
-    onErrorCaptured(() => { /* ... */ });
-  }
+    onBeforeMount(() => {
+      /* ... */
+    });
+    onMounted(() => {
+      /* ... */
+    });
+    onBeforeUpdate(() => {
+      /* ... */
+    });
+    onUpdated(() => {
+      /* ... */
+    });
+    onBeforeUnmount(() => {
+      /* ... */
+    });
+    onUnmounted(() => {
+      /* ... */
+    });
+    onErrorCaptured(() => {
+      /* ... */
+    });
+  },
 };
 ```
 
 **主要变化**：
+
 - `beforeDestroy` 改为 `onBeforeUnmount`
 - `destroyed` 改为 `onUnmounted`
 - 新增了一些生命周期钩子，如 `onRenderTracked` 和 `onRenderTriggered`
@@ -266,7 +301,7 @@ Vue 3 内置了片段功能，不需要额外的包装元素：
 </template>
 ```
 
-#### 4.3  teleport
+#### 4.3 teleport
 
 Vue 3 新增了 `teleport` 组件，可以将内容渲染到指定的 DOM 位置：
 
@@ -303,6 +338,7 @@ Vue 3 新增了 `Suspense` 组件，用于处理异步组件的加载状态：
 ### 5.1 编译优化
 
 Vue 3 的编译器做了很多优化：
+
 - 静态提升：将静态节点提升到渲染函数之外
 - 预字符串化：将静态内容编译为字符串
 - 缓存事件处理函数：避免每次渲染都创建新的函数
@@ -327,12 +363,12 @@ Vue 3 对全局 API 进行了重构，采用了模块化的方式：
 
 ```javascript
 // Vue 2
-import Vue from 'vue';
+import Vue from "vue";
 Vue.use(plugin);
 Vue.mixin(mixin);
 
 // Vue 3
-import { createApp } from 'vue';
+import { createApp } from "vue";
 const app = createApp({});
 app.use(plugin);
 app.mixin(mixin);
@@ -343,22 +379,23 @@ app.mixin(mixin);
 Vue 3 提供了自定义渲染器 API，允许我们创建自定义的渲染器：
 
 ```javascript
-import { createRenderer } from 'vue';
+import { createRenderer } from "vue";
 
 const renderer = createRenderer({
   patchProp,
   insert,
   remove,
-  createElement
+  createElement,
 });
 
 const app = renderer.createApp({});
-app.mount('#app');
+app.mount("#app");
 ```
 
 ### 6.3 更好的 TypeScript 支持
 
 Vue 3 是用 TypeScript 编写的，提供了更好的 TypeScript 支持：
+
 - 完整的类型定义
 - 更好的类型推断
 - 支持泛型组件
@@ -384,16 +421,16 @@ Vue 3 提供了兼容模式，可以渐进式迁移：
 
 ## 8. 总结
 
-| 特性 | Vue 2 | Vue 3 |
-|------|-------|-------|
-| **响应式系统** | Object.defineProperty | Proxy |
-| **API 风格** | 选项式 API | 选项式 API + 组合式 API |
-| **生命周期** | 选项式钩子 | 组合式钩子 |
-| **模板语法** | 单根节点 | 多根节点 + 片段 |
-| **性能** | 一般 | 更好 |
-| **包体积** | 较大 | 较小 |
-| **TypeScript 支持** | 一般 | 更好 |
-| **新特性** | 较少 | 较多（teleport, suspense 等） |
+| 特性                | Vue 2                 | Vue 3                         |
+| ------------------- | --------------------- | ----------------------------- |
+| **响应式系统**      | Object.defineProperty | Proxy                         |
+| **API 风格**        | 选项式 API            | 选项式 API + 组合式 API       |
+| **生命周期**        | 选项式钩子            | 组合式钩子                    |
+| **模板语法**        | 单根节点              | 多根节点 + 片段               |
+| **性能**            | 一般                  | 更好                          |
+| **包体积**          | 较大                  | 较小                          |
+| **TypeScript 支持** | 一般                  | 更好                          |
+| **新特性**          | 较少                  | 较多（teleport, suspense 等） |
 
 ## 9. 如何选择
 
@@ -401,10 +438,3 @@ Vue 3 提供了兼容模式，可以渐进式迁移：
 - **现有项目**：如果稳定运行，可暂时保持 Vue 2；如果需要新特性或性能优化，可考虑迁移
 - **小型项目**：Vue 2 和 Vue 3 都可以，根据个人偏好选择
 - **大型项目**：推荐使用 Vue 3，特别是使用 TypeScript 的项目
-
-## 10. 参考资料
-
-- [Vue 3 官方文档](https://v3.vuejs.org/)
-- [Vue 2 官方文档](https://v2.vuejs.org/)
-- [Vue 3 迁移指南](https://v3.vuejs.org/guide/migration/introduction.html)
-- [Vue 3 组合式 API 文档](https://v3.vuejs.org/guide/composition-api-introduction.html)

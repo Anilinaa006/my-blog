@@ -18,6 +18,7 @@
                 <el-option label="JS" value="JavaScript" />
                 <el-option label="Vue" value="Vue" />
                 <el-option label="React" value="React" />
+                <el-option label="网络" value="网络" />
                 <el-option label="其他" value="其他" />
               </el-select>
             </div>

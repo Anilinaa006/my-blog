@@ -502,10 +502,3 @@ Flexbox 是一种强大的布局模型，它可以轻松实现各种复杂的布
 8. 性能优化建议
 
 掌握 Flexbox 布局，将大大提高你的前端开发效率，让你能够更轻松地创建美观、响应式的布局。
-
-## 参考资料
-
-- [MDN Web Docs - Flexbox](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Basic_Concepts_of_Flexbox)
-- [CSS-Tricks - A Complete Guide to Flexbox](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
-- [W3Schools - CSS Flexbox](https://www.w3schools.com/css/css3_flexbox.asp)
-- [Can I Use - Flexbox](https://caniuse.com/?search=flexbox)
