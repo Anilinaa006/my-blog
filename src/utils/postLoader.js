@@ -13,6 +13,8 @@ const postModules = {
   Vue2和Vue3区别: () => import("../assets/posts/Vue/Vue2和Vue3区别.md?raw"),
   Vue3中watch和watchEffect区别: () =>
     import("../assets/posts/Vue/Vue3中watch和watchEffect区别.md?raw"),
+  Vue2和Vue3生命周期函数: () =>
+    import("../assets/posts/Vue/Vue2和Vue3生命周期函数.md?raw"),
   HTTP协议详解: () => import("../assets/posts/网络/HTTP协议详解.md?raw"),
   HTTP和HTTPS的区别: () =>
     import("../assets/posts/网络/HTTP和HTTPS的区别.md?raw"),
