@@ -9,6 +9,7 @@ const postModules = {
   "react-day3": () => import("../assets/posts/react-day3.md?raw"),
   "react-day4": () => import("../assets/posts/react-day4.md?raw"),
   "react-day5": () => import("../assets/posts/react-day5.md?raw"),
+  "react-day6": () => import("../assets/posts/react-day6.md?raw"),
   "Vue2和Vue3区别": () => import("../assets/posts/Vue2和Vue3区别.md?raw"),
   "防抖": () => import("../assets/posts/防抖.md?raw"),
   "节流": () => import("../assets/posts/节流.md?raw"),

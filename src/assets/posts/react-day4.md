@@ -365,9 +365,3 @@ React Router是React应用中处理路由的强大工具，它提供了声明式
 - 如何使用代码分割优化性能
 
 掌握React Router对于构建复杂的单页应用非常重要，它可以帮助我们创建具有良好用户体验的多页面应用。
-
-## 参考资料
-
-- [React Router官方文档](https://reactrouter.com/docs/en/v6)
-- [React Router教程](https://v5.reactrouter.com/web/guides/quick-start)
-- [React官方文档](https://reactjs.org/docs/getting-started.html)

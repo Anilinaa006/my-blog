@@ -200,9 +200,3 @@ function usersReducer(
 今天学习了Redux在React中的应用，包括中间件、同步状态操作、异步状态操作以及与Vuex的对比。虽然Redux的学习曲线较陡，但它是React生态中非常重要的一部分，掌握它对于构建复杂的React应用至关重要。
 
 作为Vue开发者，我会将Redux与Vuex的概念进行对比，帮助自己更好地理解和记忆。同时，我也会关注Redux Toolkit等工具，它们可以简化Redux的使用，提高开发效率。
-
-## 参考资料
-
-- [Redux官方文档](https://redux.js.org/)
-- [React-Redux官方文档](https://react-redux.js.org/)
-- [Redux Toolkit](https://redux-toolkit.js.org/)

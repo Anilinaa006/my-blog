@@ -432,12 +432,3 @@ export default App;
 - **useImperativeHandle**：用于暴露子组件的方法和属性
 
 这些Hooks可以帮助我们编写更高效、更可维护的React代码，特别是在处理复杂状态和优化性能方面。在实际开发中，我们应该根据具体场景选择合适的Hooks，避免过度使用或使用不当。
-
-## 参考资料
-
-- [React官方文档 - Hooks](https://reactjs.org/docs/hooks-intro.html)
-- [React官方文档 - useReducer](https://reactjs.org/docs/hooks-reference.html#usereducer)
-- [React官方文档 - useMemo](https://reactjs.org/docs/hooks-reference.html#usememo)
-- [React官方文档 - useCallback](https://reactjs.org/docs/hooks-reference.html#usecallback)
-- [React官方文档 - forwardRef](https://reactjs.org/docs/react-api.html#reactforwardref)
-- [React官方文档 - useImperativeHandle](https://reactjs.org/docs/hooks-reference.html#useimperativehandle)
