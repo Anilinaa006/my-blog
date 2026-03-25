@@ -25,6 +25,7 @@ const postModules = {
   prpmise: () => import("../assets/posts/JS/prpmise.md?raw"),
   关于部署纯前端静态网站: () =>
     import("../assets/posts/其他/关于部署纯前端静态网站.md?raw"),
+  原型和原型链: () => import("../assets/posts/JS/原型和原型链.md?raw"),
 };
 
 // 获取所有文章列表
