@@ -17,13 +17,13 @@
   </el-dropdown>
 </template>
 
-<script setup>
-import { ref, onMounted, watch } from "vue";
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
 import { Moon, Sunny } from "@element-plus/icons-vue";
 
 const isDark = ref(false);
 
-const handleThemeChange = (command) => {
+const handleThemeChange = (command: string): void => {
   if (command === "dark") {
     document.documentElement.classList.add("dark");
     isDark.value = true;

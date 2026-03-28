@@ -49,8 +49,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getPostMetadata, parseMarkdown } from "../utils/markdown.js";
-import { getPostById } from "../utils/postLoader.js";
+import { getPostMetadata, parseMarkdown } from "../utils/markdown.ts";
+import { getPostById } from "../utils/postLoader.ts";
 import { ArrowLeft, Timer } from "@element-plus/icons-vue";
 
 const route = useRoute();
@@ -68,7 +68,7 @@ const loadPost = async () => {
     post.value = {
       title: metadata.title,
       date: metadata.date,
-      content: parseMarkdown(metadata.content),
+      content: await parseMarkdown(metadata.content),
       contentLength: metadata.content.length,
     };
   } catch (error) {

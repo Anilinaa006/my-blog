@@ -9,9 +9,15 @@
           class="nav"
           :class="{ 'nav-mobile': isMobile, 'nav-open': isNavOpen }"
         >
-          <router-link to="/" class="nav-link" @click="closeNav">首页</router-link>
-          <router-link to="/about" class="nav-link" @click="closeNav">关于我</router-link>
-          <router-link to="/blog-intro" class="nav-link" @click="closeNav">博客介绍</router-link>
+          <router-link to="/" class="nav-link" @click="closeNav"
+            >首页</router-link
+          >
+          <router-link to="/about" class="nav-link" @click="closeNav"
+            >关于我</router-link
+          >
+          <router-link to="/blog-intro" class="nav-link" @click="closeNav"
+            >博客介绍</router-link
+          >
         </nav>
         <button class="mobile-menu-btn" @click="toggleNav" v-if="isMobile">
           <span class="menu-icon"></span>
@@ -22,7 +28,7 @@
   </header>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import ThemeToggle from "./ThemeToggle.vue";
 
@@ -30,24 +36,24 @@ const isMobile = ref(false);
 const isNavOpen = ref(false);
 const isScrolled = ref(false);
 
-const toggleNav = () => {
+const toggleNav = (): void => {
   isNavOpen.value = !isNavOpen.value;
 };
 
-const closeNav = () => {
+const closeNav = (): void => {
   if (isMobile.value) {
     isNavOpen.value = false;
   }
 };
 
-const checkMobile = () => {
+const checkMobile = (): void => {
   isMobile.value = window.innerWidth < 768;
   if (isMobile.value) {
     isNavOpen.value = false;
   }
 };
 
-const handleScroll = () => {
+const handleScroll = (): void => {
   isScrolled.value = window.scrollY > 100;
 };
 

@@ -1,5 +1,5 @@
 // 静态导入所有Markdown文章
-const postModules = {
+const postModules: Record<string, () => Promise<{ default: string }>> = {
   "first-post": () => import("../assets/posts/其他/first-post.md?raw"),
   js的闭包: () => import("../assets/posts/JS/js的闭包.md?raw"),
   bfc: () => import("../assets/posts/CSS/bfc.md?raw"),
@@ -26,11 +26,17 @@ const postModules = {
   关于部署纯前端静态网站: () =>
     import("../assets/posts/其他/关于部署纯前端静态网站.md?raw"),
   原型和原型链: () => import("../assets/posts/JS/原型和原型链.md?raw"),
+  Hooks函数: () => import("../assets/posts/React/Hooks函数.md?raw"),
 };
 
+interface PostModule {
+  id: string;
+  content: string;
+}
+
 // 获取所有文章列表
-export const getAllPosts = async () => {
-  const postList = [];
+export const getAllPosts = async (): Promise<PostModule[]> => {
+  const postList: PostModule[] = [];
 
   for (const [id, importFn] of Object.entries(postModules)) {
     try {
@@ -46,7 +52,7 @@ export const getAllPosts = async () => {
 };
 
 // 根据ID获取单个文章
-export const getPostById = async (id) => {
+export const getPostById = async (id: string): Promise<string> => {
   const importFn = postModules[id];
   if (!importFn) {
     throw new Error("文章不存在");
@@ -62,6 +68,6 @@ export const getPostById = async (id) => {
 };
 
 // 获取所有文章ID列表
-export const getPostIds = () => {
+export const getPostIds = (): string[] => {
   return Object.keys(postModules);
 };

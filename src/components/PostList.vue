@@ -26,7 +26,7 @@
         <router-link :to="`/post/${post.id}`" class="read-more">
           <el-button type="primary" size="small" :plain="!isDark">
             阅读更多
-            <el-icon class="el-icon--right"><arrow-right /></el-icon>
+            <el-icon class="el-icon--right"><ArrowRight /></el-icon>
           </el-button>
         </router-link>
       </div>
@@ -37,20 +37,26 @@
   </div>
 </template>
 
-<script setup>
-import { computed, ref, onMounted, watch } from "vue";
+<script setup lang="ts">
+import { ref, onMounted, watch } from "vue";
 import { ArrowRight } from "@element-plus/icons-vue";
 
-const props = defineProps({
-  posts: {
-    type: Array,
-    default: () => [],
-  },
-});
+interface Post {
+  id: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  contentLength: number;
+  categories: string;
+}
+
+const props = defineProps<{
+  posts: Post[];
+}>();
 
 const isDark = ref(false);
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString("zh-CN", {
     year: "numeric",
@@ -60,7 +66,7 @@ const formatDate = (dateString) => {
 };
 
 // 监听暗黑模式变化
-const checkDarkMode = () => {
+const checkDarkMode = (): void => {
   isDark.value = document.documentElement.classList.contains("dark");
 };
 
@@ -213,6 +219,20 @@ watch(
 }
 
 /* 暗黑模式 */
+.dark .post-card {
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark .post-card .el-card__header {
+  background-color: #2a2a2a !important;
+  border-bottom: 1px solid #3a3a3a !important;
+}
+
+.dark .post-card .el-card__body {
+  background-color: #2a2a2a !important;
+}
+
 .dark .post-title a {
   color: #e0e0e0;
 }

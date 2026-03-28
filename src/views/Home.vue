@@ -7,11 +7,7 @@
           <div class="filter-controls">
             <div class="category-filter">
               <span>类别：</span>
-              <el-select
-                v-model="selectedCategory"
-                @change="filterPosts"
-                size="small"
-              >
+              <el-select v-model="selectedCategory" @change="filterPosts" size="small">
                 <el-option label="全部" value="all" />
                 <el-option label="HTML" value="HTML" />
                 <el-option label="CSS" value="CSS" />
@@ -38,65 +34,65 @@
   </el-container>
 </template>
 
-<script setup>
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
-import { useRouter, useRoute } from "vue-router";
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
+import { useRoute } from "vue-router";
 import PostList from "../components/PostList.vue";
-import { getPostMetadata } from "../utils/markdown.js";
-import { getAllPosts } from "../utils/postLoader.js";
+import { getPostMetadata } from "../utils/markdown";
+import { getAllPosts } from "../utils/postLoader";
 
-const router = useRouter();
 const route = useRoute();
-const posts = ref([]);
-const originalPosts = ref([]);
+
+interface Post {
+  id: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  contentLength: number;
+  categories: string;
+}
+
+const posts = ref<Post[]>([]);
+const originalPosts = ref<Post[]>([]);
 const loading = ref(true);
 const sortOrder = ref("desc");
 const selectedCategory = ref("all");
 
-// 从localStorage加载保存的设置
-const loadSavedSettings = () => {
+const loadSavedSettings = (): void => {
   const savedCategory = localStorage.getItem("blogSelectedCategory");
   const savedSortOrder = localStorage.getItem("blogSortOrder");
-
   if (savedCategory) {
     selectedCategory.value = savedCategory;
   }
-
   if (savedSortOrder) {
     sortOrder.value = savedSortOrder;
   }
 };
 
-// 保存设置到localStorage
-const saveSettings = () => {
+const saveSettings = (): void => {
   localStorage.setItem("blogSelectedCategory", selectedCategory.value);
   localStorage.setItem("blogSortOrder", sortOrder.value);
 };
 
-// 保存滚动位置到localStorage
-const saveScrollPosition = () => {
+const saveScrollPosition = (): void => {
   const scrollPosition = window.scrollY;
   localStorage.setItem("blogScrollPosition", scrollPosition.toString());
   console.log("保存滚动位置:", scrollPosition);
 };
 
-// 恢复滚动位置
-const restoreScrollPosition = () => {
+const restoreScrollPosition = (): void => {
   const savedPosition = localStorage.getItem("blogScrollPosition");
   if (savedPosition) {
     console.log("恢复滚动位置:", savedPosition);
-    // 使用setTimeout确保DOM已经完全渲染
     setTimeout(() => {
       window.scrollTo(0, parseInt(savedPosition));
     }, 100);
   }
 };
 
-const loadPosts = async () => {
+const loadPosts = async (): Promise<void> => {
   try {
-    // 使用工具函数加载所有文章
     const postContents = await getAllPosts();
-
     const postList = postContents.map(({ id, content }) => {
       const metadata = getPostMetadata(content);
       return {
@@ -108,7 +104,6 @@ const loadPosts = async () => {
         categories: metadata.categories || "其他",
       };
     });
-
     originalPosts.value = postList;
     sortPosts();
   } catch (error) {
@@ -118,33 +113,24 @@ const loadPosts = async () => {
   }
 };
 
-const filterPosts = () => {
+const filterPosts = (): void => {
   let filteredPosts = [...originalPosts.value];
-
-  // 按类别筛选
   if (selectedCategory.value !== "all") {
-    filteredPosts = filteredPosts.filter(
-      (post) => post.categories === selectedCategory.value,
-    );
+    filteredPosts = filteredPosts.filter((post) => post.categories === selectedCategory.value);
   }
-
-  // 按日期排序
   if (sortOrder.value === "desc") {
-    filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    filteredPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   } else {
-    filteredPosts.sort((a, b) => new Date(a.date) - new Date(b.date));
+    filteredPosts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
-
   posts.value = filteredPosts;
-  // 保存设置
   saveSettings();
 };
 
-const sortPosts = () => {
+const sortPosts = (): void => {
   filterPosts();
 };
 
-// 监听设置变化并保存
 watch(selectedCategory, () => {
   saveSettings();
 });
@@ -153,7 +139,6 @@ watch(sortOrder, () => {
   saveSettings();
 });
 
-// 监听路由变化，当路由进入首页时恢复滚动位置
 watch(
   () => route.path,
   (newPath) => {
@@ -161,27 +146,19 @@ watch(
       console.log("路由进入首页，恢复滚动位置");
       restoreScrollPosition();
     }
-  },
+  }
 );
 
 onMounted(() => {
-  // 加载保存的设置
   loadSavedSettings();
-  // 加载文章
   loadPosts();
-
-  // 监听滚动事件，保存滚动位置
   window.addEventListener("scroll", saveScrollPosition);
-
-  // 页面加载完成后恢复滚动位置
   restoreScrollPosition();
 });
 
 onBeforeUnmount(() => {
-  // 组件卸载前保存滚动位置
   console.log("组件卸载前保存滚动位置");
   saveScrollPosition();
-  // 移除滚动事件监听器
   window.removeEventListener("scroll", saveScrollPosition);
 });
 </script>
@@ -280,46 +257,37 @@ onBeforeUnmount(() => {
   color: #e0e0e0;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .home {
     padding: 2rem 1rem;
   }
-
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-
   .page-title {
     font-size: 1.5rem;
     margin-bottom: 0;
   }
-
   .page-header .el-page-header__content {
     font-size: 1.5rem;
   }
-
   .filter-controls {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
     width: 100%;
   }
-
   .category-filter {
     width: 100%;
   }
-
   .category-filter .el-select {
     width: 100%;
   }
-
   .sort-control {
     width: 100%;
   }
-
   .sort-control .el-select {
     width: 100%;
   }
