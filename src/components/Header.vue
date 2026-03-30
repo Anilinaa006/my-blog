@@ -18,6 +18,9 @@
           <router-link to="/blog-intro" class="nav-link" @click="closeNav"
             >博客介绍</router-link
           >
+          <router-link to="/auth" class="nav-link" @click="closeNav"
+            >去登录</router-link
+          >
         </nav>
         <button class="mobile-menu-btn" @click="toggleNav" v-if="isMobile">
           <span class="menu-icon"></span>
