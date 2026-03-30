@@ -18,7 +18,16 @@
           <router-link to="/blog-intro" class="nav-link" @click="closeNav"
             >博客介绍</router-link
           >
-          <router-link to="/auth" class="nav-link" @click="closeNav"
+          <template v-if="isLoggedIn">
+            <span class="nav-user">
+              <el-icon><User /></el-icon>
+              {{ user?.username }}
+            </span>
+            <button class="nav-link logout-btn" @click="handleLogout">
+              退出登录
+            </button>
+          </template>
+          <router-link v-else to="/auth" class="nav-link" @click="closeNav"
             >去登录</router-link
           >
         </nav>
@@ -32,12 +41,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { ElMessage, ElIcon, ElMessageBox } from "element-plus";
+import { User } from "@element-plus/icons-vue";
 import ThemeToggle from "./ThemeToggle.vue";
+import { authAPI } from "../services/api";
 
+const router = useRouter();
+const route = useRoute();
 const isMobile = ref(false);
 const isNavOpen = ref(false);
 const isScrolled = ref(false);
+
+// 登录状态
+const isLoggedIn = ref(authAPI.isLoggedIn());
+
+// 用户信息
+const user = ref(authAPI.getUser());
+
+// 检查登录状态
+const checkLoginStatus = () => {
+  isLoggedIn.value = authAPI.isLoggedIn();
+  user.value = authAPI.getUser();
+};
+
+// 监听localStorage变化
+const handleStorageChange = (event: StorageEvent) => {
+  if (event.key === "auth_token" || event.key === "user") {
+    checkLoginStatus();
+  }
+};
+
+// 监听路由变化，检查登录状态
+watch(
+  () => route.path,
+  () => {
+    checkLoginStatus();
+  },
+);
 
 const toggleNav = (): void => {
   isNavOpen.value = !isNavOpen.value;
@@ -60,15 +102,36 @@ const handleScroll = (): void => {
   isScrolled.value = window.scrollY > 100;
 };
 
+// 处理退出登录
+const handleLogout = () => {
+  ElMessageBox.confirm("确定要退出登录吗？", "退出登录", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(() => {
+      authAPI.removeToken();
+      checkLoginStatus();
+      ElMessage.success("退出登录成功");
+      router.push("/");
+    })
+    .catch(() => {
+      // 取消退出登录，不做任何操作
+    });
+};
+
 onMounted(() => {
   checkMobile();
+  checkLoginStatus();
   window.addEventListener("resize", checkMobile);
   window.addEventListener("scroll", handleScroll);
+  window.addEventListener("storage", handleStorageChange);
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", checkMobile);
   window.removeEventListener("scroll", handleScroll);
+  window.removeEventListener("storage", handleStorageChange);
 });
 </script>
 
@@ -161,12 +224,47 @@ onUnmounted(() => {
 }
 
 .nav-link.router-link-active {
-  color: #007bff;
+  color: #409eff;
   font-weight: bold;
 }
 
 .dark .nav-link.router-link-active {
   color: #409eff;
+}
+
+.nav-user {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.dark .nav-user {
+  color: #e0e0e0;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  color: #666;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  color: #409eff;
+  background-color: #e9ecef;
+}
+
+.dark .logout-btn {
+  color: #909399;
+}
+
+.dark .logout-btn:hover {
+  color: #409eff;
+  background-color: #303030;
 }
 
 /* Mobile menu button */

@@ -1,128 +1,150 @@
 import { Router } from "express";
-import { z } from "zod";
 import { pool } from "../db";
-import { authRequired } from "../middlewares/authRequired";
-import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/errors";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const router = Router();
 
-const publishBody = z.object({
-  content: z.string().min(1).max(5000)
-});
-
+// 获取文章评论
 router.get(
-  "/posts/:postId/comments",
+  "/comments/:postId",
   asyncHandler(async (req, res) => {
     const { postId } = req.params;
-    const [rows] = await pool.query<any[]>(
+
+    const [comments] = await pool.query<any[]>(
       `
-      SELECT
-        c.id,
-        c.content,
-        c.created_at,
-        c.updated_at,
-        u.username
+      SELECT 
+        c.id, 
+        c.post_id as postId, 
+        c.user_id as userId, 
+        u.username, 
+        c.content, 
+        c.created_at as createdAt, 
+        c.updated_at as updatedAt
       FROM comments c
-      JOIN users u ON u.id = c.user_id
+      JOIN users u ON c.user_id = u.id
       WHERE c.post_id = ?
       ORDER BY c.created_at DESC
     `,
       [postId]
     );
 
-    return res.json({
-      comments: rows
-    });
+    return res.json(comments);
   })
 );
 
+// 创建评论
 router.post(
-  "/posts/:postId/comments",
-  authRequired,
+  "/comments",
   asyncHandler(async (req, res) => {
-    const { postId } = req.params;
-    const { content } = publishBody.parse(req.body);
-    const user = req.user;
-    if (!user) throw new ApiError(401, "未登录");
+    const { postId, content, userId } = req.body;
+
+    if (!postId || !content || !userId) {
+      throw new ApiError(400, "缺少必要参数");
+    }
 
     const [result]: any = await pool.query(
       "INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)",
-      [postId, user.id, content]
+      [postId, userId, content]
     );
 
     const commentId = result.insertId as number;
-    const [rows] = await pool.query<any[]>(
+
+    // 返回创建的评论
+    const [comments] = await pool.query<any[]>(
       `
-      SELECT c.id, c.content, c.created_at, c.updated_at, u.username
+      SELECT 
+        c.id, 
+        c.post_id as postId, 
+        c.user_id as userId, 
+        u.username, 
+        c.content, 
+        c.created_at as createdAt, 
+        c.updated_at as updatedAt
       FROM comments c
-      JOIN users u ON u.id = c.user_id
+      JOIN users u ON c.user_id = u.id
       WHERE c.id = ?
     `,
       [commentId]
     );
 
-    return res.status(201).json({ comment: rows[0] });
+    return res.status(201).json(comments[0]);
   })
 );
 
+// 更新评论
 router.put(
-  "/posts/:postId/comments/:commentId",
-  authRequired,
+  "/comments/:id",
   asyncHandler(async (req, res) => {
-    const { postId, commentId } = req.params;
-    const { content } = publishBody.parse(req.body);
-    const user = req.user;
-    if (!user) throw new ApiError(401, "未登录");
+    const { id } = req.params;
+    const { content, userId } = req.body;
 
-    const [result]: any = await pool.query(
-      `
-      UPDATE comments
-      SET content = ?, updated_at = NOW()
-      WHERE id = ? AND post_id = ? AND user_id = ?
-    `,
-      [content, commentId, postId, user.id]
+    if (!content || !userId) {
+      throw new ApiError(400, "缺少必要参数");
+    }
+
+    // 检查评论是否存在且属于该用户
+    const [comments] = await pool.query<any[]>(
+      "SELECT * FROM comments WHERE id = ? AND user_id = ?",
+      [id, userId]
     );
 
-    const affected = result.affectedRows as number;
-    if (!affected) throw new ApiError(403, "无权限或评论不存在");
+    if (comments.length === 0) {
+      throw new ApiError(404, "评论不存在或无权限修改");
+    }
 
-    const [rows] = await pool.query<any[]>(
+    await pool.query(
+      "UPDATE comments SET content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+      [content, id]
+    );
+
+    // 返回更新后的评论
+    const [updatedComments] = await pool.query<any[]>(
       `
-      SELECT c.id, c.content, c.created_at, c.updated_at, u.username
+      SELECT 
+        c.id, 
+        c.post_id as postId, 
+        c.user_id as userId, 
+        u.username, 
+        c.content, 
+        c.created_at as createdAt, 
+        c.updated_at as updatedAt
       FROM comments c
-      JOIN users u ON u.id = c.user_id
+      JOIN users u ON c.user_id = u.id
       WHERE c.id = ?
     `,
-      [commentId]
+      [id]
     );
 
-    return res.json({ comment: rows[0] });
+    return res.json(updatedComments[0]);
   })
 );
 
+// 删除评论
 router.delete(
-  "/posts/:postId/comments/:commentId",
-  authRequired,
+  "/comments/:id",
   asyncHandler(async (req, res) => {
-    const { postId, commentId } = req.params;
-    const user = req.user;
-    if (!user) throw new ApiError(401, "未登录");
+    const { id } = req.params;
+    const { userId } = req.body;
 
-    const [result]: any = await pool.query(
-      `
-      DELETE FROM comments
-      WHERE id = ? AND post_id = ? AND user_id = ?
-    `,
-      [commentId, postId, user.id]
+    if (!userId) {
+      throw new ApiError(400, "缺少用户ID");
+    }
+
+    // 检查评论是否存在且属于该用户
+    const [comments] = await pool.query<any[]>(
+      "SELECT * FROM comments WHERE id = ? AND user_id = ?",
+      [id, userId]
     );
 
-    const affected = result.affectedRows as number;
-    if (!affected) throw new ApiError(403, "无权限或评论不存在");
+    if (comments.length === 0) {
+      throw new ApiError(404, "评论不存在或无权限删除");
+    }
 
-    return res.status(204).send();
+    await pool.query("DELETE FROM comments WHERE id = ?", [id]);
+
+    return res.json({ message: "评论删除成功" });
   })
 );
 
 export default router;
-

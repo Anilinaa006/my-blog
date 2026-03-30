@@ -1,25 +1,15 @@
 import dotenv from "dotenv";
 
-// Load env from .env (if present) or let caller handle missing vars.
 dotenv.config();
 
-const mustGet = (key: string): string => {
-  const v = process.env[key];
-  if (!v) throw new Error(`Missing env: ${key}`);
-  return v;
-};
-
 export const env = {
-  PORT: Number(process.env.PORT ?? 3001),
-  JWT_SECRET: mustGet("JWT_SECRET"),
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? "7d",
-
-  DB_HOST: mustGet("DB_HOST"),
-  DB_PORT: Number(process.env.DB_PORT ?? 3306),
-  DB_USER: mustGet("DB_USER"),
-  DB_PASSWORD: mustGet("DB_PASSWORD"),
-  DB_NAME: mustGet("DB_NAME"),
-
-  CORS_ORIGIN: process.env.CORS_ORIGIN ?? "*"
+  PORT: process.env.PORT || 3001,
+  JWT_SECRET: process.env.JWT_SECRET || "change_me_to_a_long_random_string",
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
+  DB_HOST: process.env.DB_HOST || "127.0.0.1",
+  DB_PORT: Number(process.env.DB_PORT) || 3306,
+  DB_USER: process.env.DB_USER || "root",
+  DB_PASSWORD: process.env.DB_PASSWORD || "",
+  DB_NAME: process.env.DB_NAME || "my_blog",
+  CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5176"
 };
-
