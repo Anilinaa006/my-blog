@@ -1,13 +1,13 @@
-import { Router } from "express";
+import { Router, type Router as RouterType } from "express";
 import bcrypt from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import { z } from "zod";
-import { env } from "../env";
+import env from "../env";
 import { pool } from "../db";
 import { ApiError } from "../utils/errors";
 import { asyncHandler } from "../utils/asyncHandler";
 
-const router = Router();
+const router: RouterType = Router();
 
 const registerBody = z.object({
   username: z.string().min(3).max(50),

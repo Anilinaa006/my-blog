@@ -41,25 +41,164 @@
           </div>
         </el-card>
         <el-skeleton :rows="10" animated v-else />
+
+        <!-- 评论模块 -->
+        <div class="comments-section" v-if="post">
+          <h3 class="comments-title">
+            <el-icon><ChatDotRound /></el-icon>
+            评论 ({{ comments.length }})
+          </h3>
+
+          <!-- 评论表单 -->
+          <div class="comment-form">
+            <el-card shadow="hover">
+              <template #header>
+                <div class="comment-form-header">
+                  <h4>发表评论</h4>
+                </div>
+              </template>
+              <div v-if="isLoggedIn">
+                <el-input
+                  v-model="commentContent"
+                  type="textarea"
+                  :rows="3"
+                  placeholder="请输入评论内容"
+                  maxlength="500"
+                  show-word-limit
+                />
+                <div class="comment-form-actions">
+                  <el-button
+                    type="primary"
+                    @click="handleSubmitComment"
+                    :loading="submittingComment"
+                  >
+                    发表评论
+                  </el-button>
+                </div>
+              </div>
+              <div v-else class="login-prompt">
+                <el-button type="primary" @click="handleLogin">
+                  <el-icon><User /></el-icon>
+                  登录后发表评论
+                </el-button>
+              </div>
+            </el-card>
+          </div>
+
+          <!-- 评论列表 -->
+          <div class="comments-list" v-if="comments.length > 0">
+            <el-card
+              v-for="comment in comments"
+              :key="comment.id"
+              class="comment-card"
+              shadow="hover"
+            >
+              <div class="comment-header">
+                <div class="comment-user">
+                  <el-avatar
+                    :size="32"
+                    :src="`https://ui-avatars.com/api/?name=${comment.username}&background=409eff&color=fff`"
+                  />
+                  <span class="username">{{ comment.username }}</span>
+                </div>
+                <div class="comment-time">
+                  {{ formatCommentDate(comment.created_at) }}
+                </div>
+              </div>
+              <div class="comment-content">{{ comment.content }}</div>
+              <div
+                class="comment-actions"
+                v-if="isLoggedIn && comment.user_id === currentUserId"
+              >
+                <el-button size="small" @click="handleEditComment(comment)">
+                  <el-icon><Edit /></el-icon>
+                  编辑
+                </el-button>
+                <el-button
+                  size="small"
+                  type="danger"
+                  @click="handleDeleteComment(comment.id)"
+                >
+                  <el-icon><Delete /></el-icon>
+                  删除
+                </el-button>
+              </div>
+              <!-- 编辑评论表单 -->
+              <div
+                class="edit-comment-form"
+                v-if="editingCommentId === comment.id"
+              >
+                <el-input
+                  v-model="editCommentContent"
+                  type="textarea"
+                  :rows="3"
+                  placeholder="请输入评论内容"
+                  maxlength="500"
+                  show-word-limit
+                />
+                <div class="edit-comment-actions">
+                  <el-button size="small" @click="cancelEditComment">
+                    取消
+                  </el-button>
+                  <el-button
+                    size="small"
+                    type="primary"
+                    @click="submitEditComment(comment.id)"
+                    :loading="editingComment"
+                  >
+                    保存
+                  </el-button>
+                </div>
+              </div>
+            </el-card>
+          </div>
+          <div class="no-comments" v-else>
+            <el-empty description="暂无评论，快来发表第一条评论吧！" />
+          </div>
+        </div>
       </div>
     </el-main>
   </el-container>
 </template>
 
-<script setup>
-import { ref, onMounted } from "vue";
+<script setup lang="ts">
+import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getPostMetadata, parseMarkdown } from "../utils/markdown.ts";
-import { getPostById } from "../utils/postLoader.ts";
-import { ArrowLeft, Timer } from "@element-plus/icons-vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { getPostMetadata, parseMarkdown } from "../utils/markdown";
+import { getPostById } from "../utils/postLoader";
+import { authAPI, commentAPI } from "../services/api";
+import {
+  ArrowLeft,
+  Timer,
+  ChatDotRound,
+  User,
+  Edit,
+  Delete,
+} from "@element-plus/icons-vue";
 
 const route = useRoute();
 const router = useRouter();
-const post = ref(null);
+const post = ref<any>(null);
+
+// 评论相关状态
+const comments = ref<any[]>([]);
+const commentContent = ref("");
+const submittingComment = ref(false);
+const editingCommentId = ref<number | null>(null);
+const editCommentContent = ref("");
+const editingComment = ref(false);
+
+// 登录状态
+const isLoggedIn = computed(() => authAPI.isLoggedIn());
+const currentUserId = computed(() => {
+  const user = authAPI.getUser();
+  return user ? user.id : null;
+});
 
 const loadPost = async () => {
   try {
-    const postId = route.params.id;
+    const postId = route.params.id as string;
 
     // 使用工具函数加载文章
     const content = await getPostById(postId);
@@ -71,7 +210,10 @@ const loadPost = async () => {
       content: await parseMarkdown(metadata.content),
       contentLength: metadata.content.length,
     };
-  } catch (error) {
+
+    // 加载评论
+    await loadComments();
+  } catch (error: any) {
     console.error("加载文章失败:", error);
     post.value = {
       title: "加载失败",
@@ -81,12 +223,131 @@ const loadPost = async () => {
   }
 };
 
-const formatDate = (dateString) => {
+// 加载评论
+const loadComments = async () => {
+  try {
+    const postId = route.params.id as string;
+    console.log("文章ID:", postId);
+    const data = await commentAPI.getComments(postId);
+    comments.value = data;
+  } catch (error: any) {
+    console.error("加载评论失败:", error);
+    ElMessage.error(error.message || "加载评论失败");
+  }
+};
+
+// 发表评论
+const handleSubmitComment = async () => {
+  if (!commentContent.value.trim()) {
+    ElMessage.warning("请输入评论内容");
+    return;
+  }
+
+  try {
+    submittingComment.value = true;
+    const postId = route.params.id as string;
+    console.log("准备发表评论，文章ID:", postId, "内容:", commentContent.value);
+    const token = localStorage.getItem("token");
+    console.log("当前用户token:", token);
+    const newComment = await commentAPI.createComment(
+      postId,
+      commentContent.value,
+    );
+    console.log("评论发表成功，返回数据:", newComment);
+    comments.value.unshift(newComment);
+    commentContent.value = "";
+    ElMessage.success("评论发表成功");
+  } catch (error: any) {
+    console.error("发表评论失败:", error);
+    ElMessage.error(error.message || "发表评论失败");
+  } finally {
+    submittingComment.value = false;
+  }
+};
+
+// 编辑评论
+const handleEditComment = (comment: any) => {
+  editingCommentId.value = comment.id;
+  editCommentContent.value = comment.content;
+};
+
+// 取消编辑
+const cancelEditComment = () => {
+  editingCommentId.value = null;
+  editCommentContent.value = "";
+};
+
+// 提交编辑
+const submitEditComment = async (commentId: number) => {
+  if (!editCommentContent.value.trim()) {
+    ElMessage.warning("请输入评论内容");
+    return;
+  }
+
+  try {
+    editingComment.value = true;
+    const updatedComment = await commentAPI.updateComment(
+      commentId,
+      editCommentContent.value,
+    );
+    const index = comments.value.findIndex((c) => c.id === commentId);
+    if (index !== -1) {
+      comments.value[index] = updatedComment;
+    }
+    editingCommentId.value = null;
+    editCommentContent.value = "";
+    ElMessage.success("评论更新成功");
+  } catch (error: any) {
+    console.error("更新评论失败:", error);
+    ElMessage.error(error.message || "更新评论失败");
+  } finally {
+    editingComment.value = false;
+  }
+};
+
+// 删除评论
+const handleDeleteComment = async (commentId: number) => {
+  try {
+    await ElMessageBox.confirm("确定要删除这条评论吗？", "删除评论", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+
+    await commentAPI.deleteComment(commentId);
+    comments.value = comments.value.filter((c) => c.id !== commentId);
+    ElMessage.success("评论删除成功");
+  } catch (error: any) {
+    if (error !== "cancel") {
+      console.error("删除评论失败:", error);
+      ElMessage.error(error.message || "删除评论失败");
+    }
+  }
+};
+
+// 跳转到登录页面
+const handleLogin = () => {
+  router.push("/auth");
+};
+
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("zh-CN", {
     year: "numeric",
     month: "long",
     day: "numeric",
+  });
+};
+
+// 格式化评论日期
+const formatCommentDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
@@ -657,6 +918,152 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
 }
 
+/* 评论模块样式 */
+.comments-section {
+  margin-top: 3rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
+.comments-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.dark .comments-title {
+  color: #e0e0e0;
+  border-bottom-color: #303030;
+}
+
+.comment-form {
+  margin-bottom: 2rem;
+}
+
+.comment-form-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.dark .comment-form-header h4 {
+  color: #e0e0e0;
+}
+
+.login-prompt {
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.comment-form-actions {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comment-card {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.comment-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark .comment-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.comment-user {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.username {
+  font-weight: 600;
+  color: #333;
+}
+
+.dark .username {
+  color: #e0e0e0;
+}
+
+.comment-time {
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.dark .comment-time {
+  color: #606266;
+}
+
+.comment-content {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: #333;
+  word-break: break-word;
+}
+
+.dark .comment-content {
+  color: #e0e0e0;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.dark .comment-actions {
+  border-top-color: #303030;
+}
+
+.edit-comment-form {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.dark .edit-comment-form {
+  border-top-color: #303030;
+}
+
+.edit-comment-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.no-comments {
+  padding: 3rem 0;
+  text-align: center;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .post-title {
@@ -690,6 +1097,20 @@ onMounted(() => {
   .back-button {
     font-size: 0.9rem;
     padding: 0.4rem 0.8rem;
+  }
+
+  .comments-title {
+    font-size: 1.3rem;
+  }
+
+  .comment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .comment-time {
+    align-self: flex-start;
   }
 }
 </style>

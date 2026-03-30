@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
-import { env } from "./env";
+import env from "./env";
 import { initSchema, pool } from "./db";
 import authRoutes from "./routes/auth";
-import commentRoutes from "./routes/comments";
+import commentRoutes from "./routes/comment";
 import { ApiError } from "./utils/errors";
 
 const app = express();
@@ -13,15 +13,15 @@ app.use(
     origin: env.CORS_ORIGIN,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: false
-  })
+    credentials: false,
+  }),
 );
 app.use(express.json({ limit: "2mb" }));
 
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 
 app.use("/api/auth", authRoutes);
-app.use("/api", commentRoutes);
+app.use("/api/comments", commentRoutes);
 
 // 统一错误处理
 app.use(
@@ -29,7 +29,7 @@ app.use(
     err: unknown,
     _req: express.Request,
     res: express.Response,
-    _next: express.NextFunction
+    _next: express.NextFunction,
   ) => {
     if (err instanceof ApiError) {
       return res.status(err.status).json({ error: err.message });
@@ -37,7 +37,7 @@ app.use(
 
     console.error(err);
     return res.status(500).json({ error: "服务器错误" });
-  }
+  },
 );
 
 async function start() {
@@ -55,4 +55,3 @@ start().catch((e) => {
   console.error("[server] failed to start:", e);
   process.exit(1);
 });
-

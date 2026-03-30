@@ -1,9 +1,9 @@
-import { Router } from "express";
+import { Router, type Router as RouterType } from "express";
 import { pool } from "../db";
 import { ApiError } from "../utils/errors";
 import { asyncHandler } from "../utils/asyncHandler";
 
-const router = Router();
+const router: RouterType = Router();
 
 // 获取文章评论
 router.get(

@@ -191,19 +191,16 @@ const handleRegister = async () => {
     loading.value = true;
 
     // 调用后端API进行注册
-    const response = await authAPI.register({
+    await authAPI.register({
       username: registerForm.username,
       password: registerForm.password,
     });
 
-    // 保存令牌和用户信息
-    authAPI.saveToken(response.token, response.user);
-
     loading.value = false;
-    ElMessage.success("注册成功");
+    ElMessage.success("注册成功，请登录");
 
-    // 注册成功后跳转到首页
-    router.push("/");
+    // 注册成功后切换到登录模式
+    isLogin.value = true;
   } catch (error: any) {
     loading.value = false;
     ElMessage.error(error.message || "注册失败");
