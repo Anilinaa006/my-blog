@@ -192,7 +192,7 @@ const handleRegister = async () => {
 }
 
 .toggle-button {
-  color: #409eff;
+  color: black;
 }
 
 .auth-button {

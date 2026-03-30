@@ -7,7 +7,11 @@
           <div class="filter-controls">
             <div class="category-filter">
               <span>类别：</span>
-              <el-select v-model="selectedCategory" @change="filterPosts" size="small">
+              <el-select
+                v-model="selectedCategory"
+                @change="filterPosts"
+                size="small"
+              >
                 <el-option label="全部" value="all" />
                 <el-option label="HTML" value="HTML" />
                 <el-option label="CSS" value="CSS" />
@@ -61,7 +65,17 @@ const selectedCategory = ref("all");
 const loadSavedSettings = (): void => {
   const savedCategory = localStorage.getItem("blogSelectedCategory");
   const savedSortOrder = localStorage.getItem("blogSortOrder");
-  if (savedCategory) {
+  const validCategories = [
+    "all",
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "Vue",
+    "React",
+    "网络",
+    "其他",
+  ];
+  if (savedCategory && validCategories.includes(savedCategory)) {
     selectedCategory.value = savedCategory;
   }
   if (savedSortOrder) {
@@ -116,12 +130,18 @@ const loadPosts = async (): Promise<void> => {
 const filterPosts = (): void => {
   let filteredPosts = [...originalPosts.value];
   if (selectedCategory.value !== "all") {
-    filteredPosts = filteredPosts.filter((post) => post.categories === selectedCategory.value);
+    filteredPosts = filteredPosts.filter(
+      (post) => post.categories === selectedCategory.value,
+    );
   }
   if (sortOrder.value === "desc") {
-    filteredPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    filteredPosts.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
   } else {
-    filteredPosts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    filteredPosts.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
   }
   posts.value = filteredPosts;
   saveSettings();
@@ -146,7 +166,7 @@ watch(
       console.log("路由进入首页，恢复滚动位置");
       restoreScrollPosition();
     }
-  }
+  },
 );
 
 onMounted(() => {
