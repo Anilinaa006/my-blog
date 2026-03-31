@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <el-container class="blog-intro-container">
     <el-main>
       <div class="blog-intro">
@@ -13,13 +13,13 @@
             <el-descriptions border :column="1">
               <el-descriptions-item label="博客功能">
                 <ul class="feature-list">
-                  <li>📝 支持 Markdown 格式文章</li>
-                  <li>🌙 深色/浅色模式切换</li>
-                  <li>📱 响应式设计，对移动端友好</li>
-                  <li>🏷️ 文章分类筛选</li>
-                  <li>📅 文章发布时间排序</li>
-                  <li>⏱️ 阅读时间估算</li>
-                  <li>🔍 简洁美观的界面</li>
+                  <li>支持 Markdown 格式文章</li>
+                  <li>支持深色 / 浅色模式切换</li>
+                  <li>响应式设计，对移动端友好</li>
+                  <li>文章分类筛选</li>
+                  <li>按发布时间排序</li>
+                  <li>阅读时间估算</li>
+                  <li>简洁美观的阅读界面</li>
                 </ul>
               </el-descriptions-item>
               <el-descriptions-item label="技术栈">
@@ -32,9 +32,7 @@
                 </ul>
               </el-descriptions-item>
               <el-descriptions-item label="如何使用">
-                <p>
-                  1. 在 <code>src/assets/posts/</code> 目录下创建 Markdown 文件
-                </p>
+                <p>1. 在 <code>src/assets/posts/</code> 目录下创建 Markdown 文件</p>
                 <p>2. 每个 Markdown 文件需要包含以下 front matter：</p>
                 <pre><code>---
 title: 文章标题
@@ -42,19 +40,18 @@ date: 2026-01-01
 categories: 分类
 ---</code></pre>
                 <p>
-                  3. 在 <code>Home.vue</code> 和
-                  <code>PostDetail.vue</code> 中添加新文章的导入
+                  3. 在 <code>src/utils/postLoader.ts</code> 中添加新文章的导入配置
                 </p>
                 <p>4. 运行 <code>npm run build</code> 构建项目</p>
               </el-descriptions-item>
               <el-descriptions-item label="未来计划">
                 <ul class="future-plans">
-                  <li>🔍 添加搜索功能</li>
-                  <li>📊 添加文章统计</li>
-                  <li>💬 添加评论系统</li>
-                  <li>📚 添加标签系统</li>
-                  <li>📱 优化移动端体验</li>
-                  <li>🚀 持续更新新功能....</li>
+                  <li>添加搜索功能</li>
+                  <li>增加文章统计</li>
+                  <li>完善评论体验</li>
+                  <li>支持标签系统</li>
+                  <li>继续优化移动端体验</li>
+                  <li>持续更新更多内容</li>
                 </ul>
               </el-descriptions-item>
             </el-descriptions>
@@ -66,7 +63,6 @@ categories: 分类
 </template>
 
 <script setup>
-// 博客介绍页组件
 </script>
 
 <style scoped>
@@ -125,37 +121,35 @@ categories: 分类
 .feature-list li,
 .tech-stack li,
 .future-plans li {
-  margin-bottom: 0.8rem;
-  padding-left: 1.5rem;
-  position: relative;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.feature-list li::before,
-.future-plans li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.5rem;
+.feature-list li:last-child,
+.tech-stack li:last-child,
+.future-plans li:last-child {
+  border-bottom: none;
+}
+
+.blog-intro-content p {
+  margin-bottom: 1rem;
 }
 
 .blog-intro-content pre {
-  background-color: #f8f9fa;
+  background: #f8f9fa;
   padding: 1rem;
-  border-radius: 4px;
+  border-radius: 8px;
   overflow-x: auto;
   margin: 1rem 0;
-  font-size: 0.9rem;
 }
 
 .blog-intro-content code {
-  background-color: #f8f9fa;
+  background: #f1f3f5;
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
-  font-family: "Courier New", Courier, monospace;
   font-size: 0.9em;
 }
 
-/* 暗黑模式 */
 .dark .page-title {
   color: #e0e0e0;
 }
@@ -165,41 +159,26 @@ categories: 分类
 }
 
 .dark .blog-intro-content {
-  color: #e0e0e0;
+  color: #d0d7e2;
 }
 
 .dark .blog-intro-content pre {
-  background-color: #303030;
+  background: #2d3748;
 }
 
 .dark .blog-intro-content code {
-  background-color: #303030;
-  color: #e0e0e0;
+  background: #4a5568;
+  color: #e2e8f0;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .blog-intro {
     padding: 1.5rem 1rem;
   }
 
-  .page-title {
-    font-size: 1.3rem;
-    margin-bottom: 1.5rem;
-  }
-
+  .page-title,
   .blog-intro-title {
     font-size: 1.3rem;
-  }
-
-  .blog-intro-content {
-    font-size: 0.95rem;
-  }
-
-  .feature-list li,
-  .tech-stack li,
-  .future-plans li {
-    margin-bottom: 0.6rem;
   }
 }
 </style>

@@ -1,39 +1,41 @@
-<template>
+﻿<template>
   <header class="header" :class="{ 'header-scrolled': isScrolled }">
     <div class="container">
       <h1 class="logo">
-        <router-link to="/">FrontendDiary</router-link>
+        <router-link to="/">
+          <span class="logo-mark">FD</span>
+          <span class="logo-text">FrontendDiary</span>
+        </router-link>
       </h1>
+
       <div class="header-actions">
         <nav
           class="nav"
           :class="{ 'nav-mobile': isMobile, 'nav-open': isNavOpen }"
         >
-          <router-link to="/" class="nav-link" @click="closeNav"
-            >首页</router-link
-          >
-          <router-link to="/about" class="nav-link" @click="closeNav"
-            >关于我</router-link
-          >
-          <router-link to="/blog-intro" class="nav-link" @click="closeNav"
-            >博客介绍</router-link
-          >
+          <router-link to="/" class="nav-link" @click="closeNav">首页</router-link>
+          <router-link to="/about" class="nav-link" @click="closeNav">关于我</router-link>
+          <router-link to="/blog-intro" class="nav-link" @click="closeNav">
+            博客介绍
+          </router-link>
+
           <template v-if="isLoggedIn">
             <span class="nav-user">
               <el-icon><User /></el-icon>
               {{ user?.username }}
             </span>
-            <button class="nav-link logout-btn" @click="handleLogout">
-              退出登录
-            </button>
+            <button class="nav-link logout-btn" @click="handleLogout">退出登录</button>
           </template>
-          <router-link v-else to="/auth" class="nav-link" @click="closeNav"
-            >去登录</router-link
-          >
+
+          <router-link v-else to="/auth" class="nav-link auth-link" @click="closeNav">
+            去登录
+          </router-link>
         </nav>
+
         <button class="mobile-menu-btn" @click="toggleNav" v-if="isMobile">
           <span class="menu-icon"></span>
         </button>
+
         <ThemeToggle />
       </div>
     </div>
@@ -41,9 +43,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { ElMessage, ElIcon, ElMessageBox } from "element-plus";
+import { onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { User } from "@element-plus/icons-vue";
 import ThemeToggle from "./ThemeToggle.vue";
 import { authAPI } from "../services/api";
@@ -53,31 +55,25 @@ const route = useRoute();
 const isMobile = ref(false);
 const isNavOpen = ref(false);
 const isScrolled = ref(false);
-
-// 登录状态
 const isLoggedIn = ref(authAPI.isLoggedIn());
-
-// 用户信息
 const user = ref(authAPI.getUser());
 
-// 检查登录状态
 const checkLoginStatus = () => {
   isLoggedIn.value = authAPI.isLoggedIn();
   user.value = authAPI.getUser();
 };
 
-// 监听localStorage变化
 const handleStorageChange = (event: StorageEvent) => {
   if (event.key === "auth_token" || event.key === "user") {
     checkLoginStatus();
   }
 };
 
-// 监听路由变化，检查登录状态
 watch(
   () => route.path,
   () => {
     checkLoginStatus();
+    isNavOpen.value = false;
   },
 );
 
@@ -93,16 +89,16 @@ const closeNav = (): void => {
 
 const checkMobile = (): void => {
   isMobile.value = window.innerWidth < 768;
-  if (isMobile.value) {
+
+  if (!isMobile.value) {
     isNavOpen.value = false;
   }
 };
 
 const handleScroll = (): void => {
-  isScrolled.value = window.scrollY > 100;
+  isScrolled.value = window.scrollY > 40;
 };
 
-// 处理退出登录
 const handleLogout = () => {
   ElMessageBox.confirm("确定要退出登录吗？", "退出登录", {
     confirmButtonText: "确定",
@@ -112,17 +108,16 @@ const handleLogout = () => {
     .then(() => {
       authAPI.removeToken();
       checkLoginStatus();
-      ElMessage.success("退出登录成功");
+      ElMessage.success("已退出登录");
       router.push("/");
     })
-    .catch(() => {
-      // 取消退出登录，不做任何操作
-    });
+    .catch(() => {});
 };
 
 onMounted(() => {
   checkMobile();
   checkLoginStatus();
+  handleScroll();
   window.addEventListener("resize", checkMobile);
   window.addEventListener("scroll", handleScroll);
   window.addEventListener("storage", handleStorageChange);
@@ -137,33 +132,30 @@ onUnmounted(() => {
 
 <style scoped>
 .header {
-  background-color: rgba(248, 249, 250, 0.95);
-  border-bottom: 1px solid #e9ecef;
-  padding: 1rem 0;
-  transition: all 0.3s ease;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  inset: 0 0 auto;
   z-index: 999;
-  backdrop-filter: blur(10px);
+  padding: 1rem 0;
+  background: rgba(248, 250, 255, 0.72);
+  border-bottom: 1px solid rgba(219, 228, 243, 0.7);
+  backdrop-filter: blur(18px);
+  transition: all 0.35s ease;
+}
+
+.header-scrolled {
+  padding: 0.75rem 0;
+  background: rgba(248, 250, 255, 0.9);
+  box-shadow: 0 10px 30px rgba(87, 107, 142, 0.12);
 }
 
 .dark .header {
-  background-color: rgba(31, 35, 41, 0.95);
-  border-bottom: 1px solid #303030;
-}
-
-/* 吸附效果 */
-.header-scrolled {
-  padding: 0.8rem 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background-color: rgba(248, 249, 250, 0.98);
+  background: rgba(15, 20, 29, 0.72);
+  border-bottom-color: rgba(62, 72, 89, 0.75);
 }
 
 .dark .header-scrolled {
-  background-color: rgba(31, 35, 41, 0.98);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: rgba(15, 20, 29, 0.92);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
 }
 
 .container {
@@ -171,184 +163,214 @@ onUnmounted(() => {
   margin: 0 auto;
   padding: 0 1rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
 }
 
 .logo {
-  font-size: 1.5rem;
-  font-weight: bold;
   margin: 0;
+  font-size: 1.45rem;
 }
 
 .logo a {
-  color: #333;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   text-decoration: none;
 }
 
-.dark .logo a {
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #409eff, #36cfc9);
   color: #fff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: 0 10px 22px rgba(64, 158, 255, 0.28);
+}
+
+.logo-text {
+  color: #18243a;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.dark .logo-text {
+  color: #f0f4ff;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .nav {
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: inset 0 0 0 1px rgba(228, 235, 245, 0.9);
 }
 
-.nav-link {
-  color: #666;
+.dark .nav {
+  background: rgba(26, 32, 45, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(63, 73, 90, 0.9);
+}
+
+.nav-link,
+.logout-btn,
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #5f6c82;
+  font-size: 0.95rem;
   text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
+  cursor: pointer;
 }
 
-.nav-link:hover {
-  color: #007bff;
-  background-color: #e9ecef;
-}
-
-.dark .nav-link {
-  color: #c0c4cc;
-}
-
-.dark .nav-link:hover {
-  color: #409eff;
-  background-color: #303030;
+.nav-link:hover,
+.logout-btn:hover {
+  color: #1f73df;
+  background: rgba(64, 158, 255, 0.1);
 }
 
 .nav-link.router-link-active {
-  color: #409eff;
-  font-weight: bold;
+  color: #155fc8;
+  background: rgba(64, 158, 255, 0.14);
+  font-weight: 700;
 }
 
-.dark .nav-link.router-link-active {
-  color: #409eff;
+.auth-link {
+  background: linear-gradient(135deg, rgba(64, 158, 255, 0.13), rgba(54, 207, 201, 0.13));
 }
 
 .nav-user {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  color: #333;
-  font-weight: 500;
+  gap: 0.45rem;
+  color: #1f2d44;
+  font-weight: 600;
+}
+
+.dark .nav-link,
+.dark .logout-btn {
+  color: #c2cbe0;
 }
 
 .dark .nav-user {
-  color: #e0e0e0;
+  color: #eef3ff;
 }
 
-.logout-btn {
-  background: none;
-  border: none;
-  padding: 0.5rem 1rem;
-  color: #666;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  cursor: pointer;
+.dark .nav-link:hover,
+.dark .logout-btn:hover,
+.dark .nav-link.router-link-active {
+  color: #8fc5ff;
+  background: rgba(64, 158, 255, 0.12);
 }
 
-.logout-btn:hover {
-  color: #409eff;
-  background-color: #e9ecef;
-}
-
-.dark .logout-btn {
-  color: #909399;
-}
-
-.dark .logout-btn:hover {
-  color: #409eff;
-  background-color: #303030;
-}
-
-/* Mobile menu button */
 .mobile-menu-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border: none;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(228, 235, 245, 0.95);
+  cursor: pointer;
+}
+
+.dark .mobile-menu-btn {
+  background: rgba(25, 31, 43, 0.88);
+  box-shadow: inset 0 0 0 1px rgba(63, 73, 90, 0.92);
+}
+
+.menu-icon,
+.menu-icon::before,
+.menu-icon::after {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 999px;
+  background: #24334d;
+  transition: all 0.25s ease;
 }
 
 .menu-icon {
-  display: block;
-  width: 24px;
-  height: 2px;
-  background-color: #333;
   position: relative;
-  transition: all 0.3s ease;
-}
-
-.dark .menu-icon {
-  background-color: #fff;
 }
 
 .menu-icon::before,
 .menu-icon::after {
   content: "";
   position: absolute;
-  width: 24px;
-  height: 2px;
-  background-color: #333;
-  transition: all 0.3s ease;
-}
-
-.dark .menu-icon::before,
-.dark .menu-icon::after {
-  background-color: #fff;
+  left: 0;
 }
 
 .menu-icon::before {
-  top: -8px;
+  top: -6px;
 }
 
 .menu-icon::after {
-  bottom: -8px;
+  top: 6px;
 }
 
-/* Mobile navigation */
+.dark .menu-icon,
+.dark .menu-icon::before,
+.dark .menu-icon::after {
+  background: #eef3ff;
+}
+
 .nav-mobile {
   position: fixed;
-  top: 0;
-  right: -100%;
-  width: 70%;
-  max-width: 280px;
-  height: 100vh;
-  background-color: #f8f9fa;
+  top: 72px;
+  right: 1rem;
+  width: min(300px, calc(100vw - 2rem));
+  height: auto;
+  padding: 1rem;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 2rem 1rem;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
-  transition: right 0.3s ease;
-  z-index: 1000;
+  align-items: stretch;
+  gap: 0.5rem;
+  border-radius: 24px;
+  background: rgba(250, 252, 255, 0.96);
+  box-shadow: 0 20px 45px rgba(33, 48, 77, 0.18);
+  transform: translateY(-16px);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .dark .nav-mobile {
-  background-color: #1f2329;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+  background: rgba(19, 24, 34, 0.98);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32);
 }
 
 .nav-open {
-  right: 0;
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.nav-mobile .nav-link {
+.nav-mobile .nav-link,
+.nav-mobile .logout-btn,
+.nav-mobile .nav-user {
   width: 100%;
-  padding: 1rem;
-  border-radius: 0;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.dark .nav-mobile .nav-link {
-  border-bottom: 1px solid #303030;
+  justify-content: flex-start;
+  border-radius: 16px;
 }
 
 @media (max-width: 767px) {
@@ -356,12 +378,22 @@ onUnmounted(() => {
     padding: 0.8rem 0;
   }
 
+  .container {
+    gap: 0.75rem;
+  }
+
   .logo {
     font-size: 1.2rem;
   }
 
-  .header-actions {
-    gap: 0.5rem;
+  .logo-mark {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 12px;
+  }
+
+  .logo-text {
+    font-size: 1.1rem;
   }
 }
 </style>

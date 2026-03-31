@@ -1,27 +1,34 @@
 <template>
   <div class="post-list">
     <el-card
-      v-for="post in posts"
+      v-for="(post, index) in posts"
       :key="post.id"
       class="post-card"
       shadow="hover"
     >
       <template #header>
         <div class="post-header">
+          <div class="post-badge-row">
+            <span class="post-index">0{{ index + 1 }}</span>
+            <el-tag effect="plain" round class="category-tag">
+              {{ formatCategory(post.categories) }}
+            </el-tag>
+          </div>
           <h2 class="post-title">
             <router-link :to="`/post/${post.id}`">{{ post.title }}</router-link>
           </h2>
         </div>
       </template>
+
       <div class="post-meta">
-        <el-tag size="small" type="info">{{ formatDate(post.date) }}</el-tag>
-        <span class="post-reading-time"
-          >阅读时间: {{ Math.ceil(post.contentLength / 500) }} 分钟</span
-        >
+        <span class="meta-pill">{{ formatDate(post.date) }}</span>
+        <span class="meta-pill">阅读 {{ Math.ceil(post.contentLength / 500) }} 分钟</span>
       </div>
+
       <div class="post-excerpt" v-if="post.excerpt">
         {{ post.excerpt }}
       </div>
+
       <div class="post-footer">
         <router-link :to="`/post/${post.id}`" class="read-more">
           <el-button type="primary" size="small" :plain="!isDark">
@@ -31,6 +38,7 @@
         </router-link>
       </div>
     </el-card>
+
     <div v-if="posts.length === 0" class="empty-state">
       <el-empty description="暂无文章" />
     </div>
@@ -38,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { ArrowRight } from "@element-plus/icons-vue";
 
 interface Post {
@@ -50,7 +58,7 @@ interface Post {
   categories: string;
 }
 
-const props = defineProps<{
+defineProps<{
   posts: Post[];
 }>();
 
@@ -58,6 +66,7 @@ const isDark = ref(false);
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
+
   return date.toLocaleDateString("zh-CN", {
     year: "numeric",
     month: "long",
@@ -65,7 +74,16 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-// 监听暗黑模式变化
+const formatCategory = (category: string): string => {
+  const labelMap: Record<string, string> = {
+    Vue: "Vue.js",
+    维尤: "Vue.js",
+    React: "React.js",
+  };
+
+  return labelMap[category] ?? category;
+};
+
 const checkDarkMode = (): void => {
   isDark.value = document.documentElement.classList.contains("dark");
 };
@@ -75,7 +93,6 @@ onMounted(() => {
   window.addEventListener("resize", checkDarkMode);
 });
 
-// 监听主题变化
 watch(
   () => document.documentElement.classList.contains("dark"),
   (newValue) => {
@@ -86,119 +103,130 @@ watch(
 
 <style scoped>
 .post-list {
-  margin-top: 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
 }
 
-@media (max-width: 767px) {
-  .post-list {
-    grid-template-columns: 1fr;
-    gap: 1.2rem;
-    margin-top: 1.5rem;
-  }
-
-  .post-title {
-    font-size: 1.1rem;
-  }
-
-  .post-excerpt {
-    font-size: 0.9rem;
-    -webkit-line-clamp: 3;
-  }
-
-  .post-card {
-    border-radius: 8px;
-  }
-
-  .post-footer {
-    margin-top: 1rem;
-  }
-
-  .post-meta {
-    font-size: 0.8rem;
-  }
+.post-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid #e6edf7;
+  background:
+    radial-gradient(circle at top right, rgba(64, 158, 255, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(250, 252, 255, 0.98));
+  box-shadow: 0 18px 38px rgba(84, 108, 147, 0.1);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
 }
 
-.post-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 12px;
-  overflow: hidden;
+.post-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #409eff, #36cfc9);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .post-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12) !important;
+  border-color: #cfe3ff;
+  box-shadow: 0 24px 50px rgba(60, 96, 160, 0.16) !important;
+}
+
+.post-card:hover::before {
+  opacity: 1;
 }
 
 .post-header {
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-badge-row {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+}
+
+.post-index {
+  color: #b3bfd3;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.category-tag {
+  border-color: rgba(64, 158, 255, 0.2);
+  color: #2f6fd7;
+  background: rgba(64, 158, 255, 0.08);
 }
 
 .post-title {
-  font-size: 1.3rem;
   margin: 0;
-  flex: 1;
-  line-height: 1.4;
-  font-weight: 600;
+  font-size: 1.32rem;
+  line-height: 1.45;
+  font-weight: 700;
 }
 
 .post-title a {
-  color: #333;
-  text-decoration: none;
-  transition: all 0.3s ease;
   display: block;
-  padding-right: 1rem;
+  color: #1d2740;
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .post-title a:hover {
   color: #409eff;
-  transform: translateX(5px);
+  transform: translateX(4px);
 }
 
 .post-meta {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.7rem;
   margin-bottom: 1rem;
-  font-size: 0.85rem;
-  color: #999;
 }
 
-.post-reading-time {
-  color: #999;
-  font-size: 0.85rem;
-}
-
-.dark .post-reading-time {
-  color: #606266;
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: #f4f7fb;
+  color: #66748a;
+  font-size: 0.84rem;
 }
 
 .post-excerpt {
-  color: #555;
-  line-height: 1.7;
-  margin: 1rem 0;
-  font-size: 0.95rem;
+  color: #556176;
+  line-height: 1.85;
+  font-size: 0.96rem;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: 7.2em;
 }
 
 .post-footer {
-  margin-top: 1.5rem;
+  margin-top: 1.6rem;
   text-align: right;
 }
 
 .read-more {
-  text-decoration: none;
   display: inline-block;
-  transition: all 0.3s ease;
+  text-decoration: none;
+  transition: transform 0.3s ease;
 }
 
 .read-more:hover {
@@ -209,43 +237,67 @@ watch(
   grid-column: 1 / -1;
   padding: 6rem 0;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
 }
 
 .empty-state .el-empty {
-  transform: scale(1.2);
+  transform: scale(1.12);
 }
 
-/* 暗黑模式 */
 .dark .post-card {
-  background-color: #2a2a2a !important;
-  border-color: #3a3a3a !important;
+  border-color: #344056 !important;
+  background:
+    radial-gradient(circle at top right, rgba(64, 158, 255, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(27, 34, 47, 0.98), rgba(21, 26, 36, 0.98)) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
 }
 
-.dark .post-card .el-card__header {
-  background-color: #2a2a2a !important;
-  border-bottom: 1px solid #3a3a3a !important;
-}
-
+.dark .post-card .el-card__header,
 .dark .post-card .el-card__body {
-  background-color: #2a2a2a !important;
+  background: transparent !important;
+}
+
+.dark .post-index {
+  color: #6f7d93;
+}
+
+.dark .category-tag {
+  color: #8fc5ff;
+  background: rgba(64, 158, 255, 0.12);
+  border-color: rgba(64, 158, 255, 0.18);
 }
 
 .dark .post-title a {
-  color: #e0e0e0;
-}
-
-.dark .post-title a:hover {
-  color: #409eff;
+  color: #ecf2ff;
 }
 
 .dark .post-excerpt {
-  color: #a0a0a0;
+  color: #aab4c7;
 }
 
-.dark .post-meta {
-  color: #606266;
+.dark .meta-pill {
+  background: rgba(40, 48, 63, 0.95);
+  color: #b5bfd2;
+}
+
+@media (max-width: 767px) {
+  .post-list {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .post-card {
+    border-radius: 18px;
+  }
+
+  .post-title {
+    font-size: 1.15rem;
+  }
+
+  .post-excerpt {
+    min-height: auto;
+    -webkit-line-clamp: 3;
+    font-size: 0.92rem;
+  }
 }
 </style>

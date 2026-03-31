@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <el-container class="post-detail-container">
-    <!-- 固定导航栏 -->
     <div class="fixed-navbar">
       <div class="navbar-content">
         <el-button class="back-button" @click="handleBack" plain>
@@ -25,9 +24,7 @@
                 </div>
                 <div class="post-reading-time">
                   <el-icon><Timer /></el-icon>
-                  <span
-                    >{{ Math.ceil(post.contentLength / 500) }} 分钟阅读</span
-                  >
+                  <span>{{ Math.ceil(post.contentLength / 500) }} 分钟阅读</span>
                 </div>
               </div>
             </div>
@@ -42,14 +39,12 @@
         </el-card>
         <el-skeleton :rows="10" animated v-else />
 
-        <!-- 评论模块 -->
         <div class="comments-section" v-if="post">
           <h3 class="comments-title">
             <el-icon><ChatDotRound /></el-icon>
-            评论 ({{ comments.length }})
+            评论（{{ comments.length }}）
           </h3>
 
-          <!-- 评论表单 -->
           <div class="comment-form">
             <el-card shadow="hover">
               <template #header>
@@ -85,7 +80,6 @@
             </el-card>
           </div>
 
-          <!-- 评论列表 -->
           <div class="comments-list" v-if="comments.length > 0">
             <el-card
               v-for="comment in comments"
@@ -123,7 +117,6 @@
                   删除
                 </el-button>
               </div>
-              <!-- 编辑评论表单 -->
               <div
                 class="edit-comment-form"
                 v-if="editingCommentId === comment.id"
@@ -153,7 +146,7 @@
             </el-card>
           </div>
           <div class="no-comments" v-else>
-            <el-empty description="暂无评论，快来发表第一条评论吧！" />
+            <el-empty description="暂无评论，快来发表第一条评论吧" />
           </div>
         </div>
       </div>
@@ -162,7 +155,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getPostMetadata, parseMarkdown } from "../utils/markdown";
@@ -181,7 +174,6 @@ const route = useRoute();
 const router = useRouter();
 const post = ref<any>(null);
 
-// 评论相关状态
 const comments = ref<any[]>([]);
 const commentContent = ref("");
 const submittingComment = ref(false);
@@ -189,7 +181,6 @@ const editingCommentId = ref<number | null>(null);
 const editCommentContent = ref("");
 const editingComment = ref(false);
 
-// 登录状态
 const isLoggedIn = computed(() => authAPI.isLoggedIn());
 const currentUserId = computed(() => {
   const user = authAPI.getUser();
@@ -199,8 +190,6 @@ const currentUserId = computed(() => {
 const loadPost = async () => {
   try {
     const postId = route.params.id as string;
-
-    // 使用工具函数加载文章
     const content = await getPostById(postId);
     const metadata = getPostMetadata(content);
 
@@ -211,7 +200,6 @@ const loadPost = async () => {
       contentLength: metadata.content.length,
     };
 
-    // 加载评论
     await loadComments();
   } catch (error: any) {
     console.error("加载文章失败:", error);
@@ -223,11 +211,9 @@ const loadPost = async () => {
   }
 };
 
-// 加载评论
 const loadComments = async () => {
   try {
     const postId = route.params.id as string;
-    console.log("文章ID:", postId);
     const data = await commentAPI.getComments(postId);
     comments.value = data;
   } catch (error: any) {
@@ -236,7 +222,6 @@ const loadComments = async () => {
   }
 };
 
-// 发表评论
 const handleSubmitComment = async () => {
   if (!commentContent.value.trim()) {
     ElMessage.warning("请输入评论内容");
@@ -246,14 +231,10 @@ const handleSubmitComment = async () => {
   try {
     submittingComment.value = true;
     const postId = route.params.id as string;
-    console.log("准备发表评论，文章ID:", postId, "内容:", commentContent.value);
-    const token = localStorage.getItem("token");
-    console.log("当前用户token:", token);
     const newComment = await commentAPI.createComment(
       postId,
       commentContent.value,
     );
-    console.log("评论发表成功，返回数据:", newComment);
     comments.value.unshift(newComment);
     commentContent.value = "";
     ElMessage.success("评论发表成功");
@@ -265,19 +246,16 @@ const handleSubmitComment = async () => {
   }
 };
 
-// 编辑评论
 const handleEditComment = (comment: any) => {
   editingCommentId.value = comment.id;
   editCommentContent.value = comment.content;
 };
 
-// 取消编辑
 const cancelEditComment = () => {
   editingCommentId.value = null;
   editCommentContent.value = "";
 };
 
-// 提交编辑
 const submitEditComment = async (commentId: number) => {
   if (!editCommentContent.value.trim()) {
     ElMessage.warning("请输入评论内容");
@@ -305,7 +283,6 @@ const submitEditComment = async (commentId: number) => {
   }
 };
 
-// 删除评论
 const handleDeleteComment = async (commentId: number) => {
   try {
     await ElMessageBox.confirm("确定要删除这条评论吗？", "删除评论", {
@@ -325,7 +302,6 @@ const handleDeleteComment = async (commentId: number) => {
   }
 };
 
-// 跳转到登录页面
 const handleLogin = () => {
   router.push("/auth");
 };
@@ -339,7 +315,6 @@ const formatDate = (dateString: string) => {
   });
 };
 
-// 格式化评论日期
 const formatCommentDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleString("zh-CN", {
@@ -352,24 +327,21 @@ const formatCommentDate = (dateString: string) => {
 };
 
 const handleBack = () => {
-  console.log("点击返回按钮");
   router.push("/");
 };
 
 onMounted(() => {
-  // 滚动到页面顶部
   window.scrollTo(0, 0);
   loadPost();
 });
 </script>
-
 <style scoped>
 .post-detail-container {
   min-height: calc(100vh - 60px);
   position: relative;
 }
 
-/* 固定导航栏 */
+/* 鍥哄畾瀵艰埅鏍?*/
 .fixed-navbar {
   position: fixed;
   top: 60px;
@@ -480,7 +452,7 @@ onMounted(() => {
   transition: all 0.3s ease;
 }
 
-/* 暗黑模式 */
+/* 鏆楅粦妯″紡 */
 .dark .page-header {
   border-bottom: 1px solid #303030;
 }
@@ -498,7 +470,7 @@ onMounted(() => {
   color: #e0e0e0;
 }
 
-/* 响应式设计 */
+/* 鍝嶅簲寮忚璁?*/
 @media (max-width: 768px) {
   .page-header .el-page-header__title {
     font-size: 1.2rem;
@@ -736,7 +708,7 @@ onMounted(() => {
   display: block;
 }
 
-/* 引用样式 */
+/* 寮曠敤鏍峰紡 */
 .post-body blockquote {
   border-left: 4px solid #409eff;
   margin: 2rem 0;
@@ -747,7 +719,7 @@ onMounted(() => {
   color: #666;
 }
 
-/* 分隔线样式 */
+/* 鍒嗛殧绾挎牱寮?*/
 .post-body hr {
   border: none;
   height: 1px;
@@ -755,7 +727,7 @@ onMounted(() => {
   margin: 3rem 0;
 }
 
-/* 表格样式 */
+/* 琛ㄦ牸鏍峰紡 */
 .post-body table {
   width: 100%;
   border-collapse: collapse;
@@ -782,7 +754,7 @@ onMounted(() => {
   background-color: #f8f9fa;
 }
 
-/* 暗黑模式样式 */
+/* 鏆楅粦妯″紡鏍峰紡 */
 .dark .post-body {
   color: #e0e0e0;
 }
@@ -880,7 +852,7 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
 }
 
-/* 暗黑模式 */
+/* 鏆楅粦妯″紡 */
 .dark .post-header {
   border-bottom: 1px solid #303030;
 }
@@ -946,7 +918,7 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
 }
 
-/* 评论模块样式 */
+/* 璇勮妯″潡鏍峰紡 */
 .comments-section {
   margin-top: 3rem;
   max-width: 800px;
@@ -1104,7 +1076,7 @@ onMounted(() => {
   text-align: center;
 }
 
-/* 响应式设计 */
+/* 鍝嶅簲寮忚璁?*/
 @media (max-width: 768px) {
   .post-title {
     font-size: 1.8rem;
@@ -1154,3 +1126,4 @@ onMounted(() => {
   }
 }
 </style>
+

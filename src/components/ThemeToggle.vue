@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <el-dropdown trigger="click" @command="handleThemeChange">
     <el-button circle>
       <el-icon v-if="!isDark">
@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { Moon, Sunny } from "@element-plus/icons-vue";
 
 const isDark = ref(false);
