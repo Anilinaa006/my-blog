@@ -512,6 +512,20 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+.dark .post-card {
+  background-color: #1f2329 !important;
+  border-color: #30363d !important;
+}
+
+.dark .post-card .el-card__header {
+  background-color: #1f2329 !important;
+  border-bottom-color: #30363d !important;
+}
+
+.dark .post-card .el-card__body {
+  background-color: #1f2329 !important;
+}
+
 .post-card:hover {
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12) !important;
   transform: translateY(-2px);
@@ -773,6 +787,20 @@ onMounted(() => {
   color: #e0e0e0;
 }
 
+.dark .post-body p,
+.dark .post-body ul,
+.dark .post-body ol,
+.dark .post-body li,
+.dark .post-body strong,
+.dark .post-body em,
+.dark .post-body td {
+  color: #d6dbe1;
+}
+
+.dark .post-body a {
+  color: #79bbff;
+}
+
 .dark .post-body h2 {
   color: #e0e0e0;
   border-bottom-color: #409eff;
@@ -946,6 +974,18 @@ onMounted(() => {
 
 .comment-form {
   margin-bottom: 2rem;
+}
+
+.dark .comment-form .el-card,
+.dark .comment-card {
+  background-color: #1f2329 !important;
+  border-color: #30363d !important;
+}
+
+.dark .comment-form .el-card__header,
+.dark .comment-card .el-card__body,
+.dark .comment-form .el-card__body {
+  background-color: #1f2329 !important;
 }
 
 .comment-form-header h4 {
