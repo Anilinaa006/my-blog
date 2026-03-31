@@ -7,7 +7,8 @@
             <span class="hero-kicker">Frontend Diary</span>
             <h1 class="hero-title">把前端学习笔记整理成更舒服的阅读空间</h1>
             <p class="hero-description">
-              这里收集 Vue、React、CSS、网络与工程化内容。希望它像一份持续更新的前端工作手记，清晰、耐读，也方便回看。
+              这里收集
+              Vue、React、CSS、网络与工程化内容。希望它像一份持续更新的前端工作手记，清晰、耐读，也方便回看。
             </p>
           </div>
           <div class="hero-stats">
@@ -31,7 +32,9 @@
             <div class="title-group">
               <span class="section-tag">Latest Notes</span>
               <h2 class="page-title">文章列表</h2>
-              <p class="page-subtitle">按分类和时间快速筛选，挑一篇继续读下去。</p>
+              <p class="page-subtitle">
+                按分类和时间快速筛选，挑一篇继续读下去。
+              </p>
             </div>
             <div class="filter-controls">
               <div class="category-filter">
@@ -253,9 +256,21 @@ onBeforeUnmount(() => {
   padding: 2.5rem;
   border-radius: 28px;
   background:
-    radial-gradient(circle at top right, rgba(64, 158, 255, 0.22), transparent 34%),
-    radial-gradient(circle at left bottom, rgba(54, 207, 201, 0.16), transparent 28%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(242, 247, 255, 0.88));
+    radial-gradient(
+      circle at top right,
+      rgba(64, 158, 255, 0.22),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at left bottom,
+      rgba(54, 207, 201, 0.16),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.94),
+      rgba(242, 247, 255, 0.88)
+    );
   border: 1px solid rgba(255, 255, 255, 0.86);
   box-shadow: 0 26px 64px rgba(75, 101, 143, 0.16);
 }
@@ -268,7 +283,11 @@ onBeforeUnmount(() => {
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(64, 158, 255, 0.24), transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(64, 158, 255, 0.24),
+    transparent 70%
+  );
 }
 
 .hero-copy,
@@ -427,8 +446,16 @@ onBeforeUnmount(() => {
 
 .dark .hero-section {
   background:
-    radial-gradient(circle at top right, rgba(64, 158, 255, 0.18), transparent 34%),
-    radial-gradient(circle at left bottom, rgba(45, 212, 191, 0.12), transparent 30%),
+    radial-gradient(
+      circle at top right,
+      rgba(64, 158, 255, 0.18),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at left bottom,
+      rgba(45, 212, 191, 0.12),
+      transparent 30%
+    ),
     linear-gradient(135deg, rgba(24, 30, 42, 0.96), rgba(18, 22, 31, 0.94));
   border-color: rgba(80, 92, 116, 0.82);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);

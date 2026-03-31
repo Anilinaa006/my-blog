@@ -5,8 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:client": "vite",
+    "dev:server": "npm --prefix server run dev",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:client": "vite build",
+    "build:server": "npm --prefix server run build",
+    "preview": "vite preview",
+    "start:server": "npm --prefix server run start"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",

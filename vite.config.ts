@@ -1,10 +1,24 @@
-import { defineConfig } from "vite";
+﻿import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import vueJsx from "@vitejs/plugin-vue-jsx";
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [vue(), vueJsx()],
-  assetsInclude: ["**/*.md"],
-  base: process.env.NODE_ENV === "production" && process.env.VERCEL ? "" : "/",
+export default defineConfig(({ command }) => {
+  const isVercel = Boolean(process.env.VERCEL);
+  const isDev = command === "serve";
+
+  return {
+    plugins: [vue()],
+    assetsInclude: ["**/*.md"],
+    base: isDev ? "/" : isVercel ? "/" : "/my-blog/",
+    server: {
+      proxy: {
+        "/api": {
+          target: "http://localhost:3001",
+          changeOrigin: true,
+        },
+      },
+    },
+    optimizeDeps: {
+      exclude: ["**/*.md"],
+    },
+  };
 });
