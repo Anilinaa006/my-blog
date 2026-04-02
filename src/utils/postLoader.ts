@@ -23,13 +23,14 @@ const postModules: Record<string, () => Promise<{ default: string }>> = {
   防抖: () => import("../assets/posts/JS/防抖.md?raw"),
   节流: () => import("../assets/posts/JS/节流.md?raw"),
   flex: () => import("../assets/posts/CSS/flex.md?raw"),
-  prpmise: () => import("../assets/posts/JS/prpmise.md?raw"),
+  prpmise: () => import("../assets/posts/JS/propmise.md?raw"),
   关于部署纯前端静态网站: () =>
     import("../assets/posts/其他/关于部署纯前端静态网站.md?raw"),
   原型和原型链: () => import("../assets/posts/JS/原型和原型链.md?raw"),
   Hooks函数: () => import("../assets/posts/React/Hooks函数.md?raw"),
   Vue和React的区别: () =>
     import("../assets/posts/其他/Vue和React的区别.md?raw"),
+  关于TS: () => import("../assets/posts/JS/关于TS.md?raw"),
 };
 
 interface PostModule {
