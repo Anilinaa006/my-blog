@@ -20,14 +20,17 @@
                   <li>按发布时间排序</li>
                   <li>阅读时间估算</li>
                   <li>简洁美观的阅读界面</li>
+                  <li>支持文章评论</li>
+                  <li>包含登录和注册功能</li>
                 </ul>
               </el-descriptions-item>
               <el-descriptions-item label="技术栈">
                 <ul class="tech-stack">
-                  <li>Vue 3 + Composition API</li>
+                  <li>Vue 3 + Composition API + TypeScript</li>
                   <li>Vue Router</li>
                   <li>Element Plus 组件库</li>
                   <li>Marked 用于 Markdown 解析</li>
+                  <li>后端：Node.js + Express + MySQL</li>
                   <li>Vite 构建工具</li>
                 </ul>
               </el-descriptions-item>
