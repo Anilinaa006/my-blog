@@ -5,10 +5,10 @@
         <section class="hero-section">
           <div class="hero-copy">
             <span class="hero-kicker">Frontend Diary</span>
-            <h1 class="hero-title">把前端学习笔记整理成更舒服的阅读空间</h1>
+            <h1 class="hero-title">这是我学习前端的一些笔记和总结</h1>
             <p class="hero-description">
               这里收集
-              Vue、React、CSS、网络与工程化内容。希望它像一份持续更新的前端工作手记，清晰、耐读，也方便回看。
+              Vue、React、CSS、JavaScript、网络与工程化内容以及其内容。
             </p>
           </div>
           <div class="hero-stats">

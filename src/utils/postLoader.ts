@@ -31,6 +31,7 @@ const postModules: Record<string, () => Promise<{ default: string }>> = {
   Vue和React的区别: () =>
     import("../assets/posts/其他/Vue和React的区别.md?raw"),
   关于TS: () => import("../assets/posts/JS/关于TS.md?raw"),
+  "Ant Design": () => import("../assets/posts/其他/Ant Design.md?raw"),
 };
 
 interface PostModule {

@@ -4,7 +4,7 @@
       <section class="auth-shell">
         <div class="auth-showcase">
           <span class="auth-kicker">Frontend Diary</span>
-          <h1 class="showcase-title">把登录页也变成更舒服的阅读入口</h1>
+          <h1 class="showcase-title">登录后即可发布评论</h1>
           <p class="showcase-description">
             登录后可以参与评论、管理自己的内容轨迹，也能让这份前端学习手记更有互动感。
           </p>

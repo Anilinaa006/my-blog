@@ -34,19 +34,6 @@
                   <li>Vite 构建工具</li>
                 </ul>
               </el-descriptions-item>
-              <el-descriptions-item label="如何使用">
-                <p>1. 在 <code>src/assets/posts/</code> 目录下创建 Markdown 文件</p>
-                <p>2. 每个 Markdown 文件需要包含以下 front matter：</p>
-                <pre><code>---
-title: 文章标题
-date: 2026-01-01
-categories: 分类
----</code></pre>
-                <p>
-                  3. 在 <code>src/utils/postLoader.ts</code> 中添加新文章的导入配置
-                </p>
-                <p>4. 运行 <code>npm run build</code> 构建项目</p>
-              </el-descriptions-item>
               <el-descriptions-item label="未来计划">
                 <ul class="future-plans">
                   <li>添加搜索功能</li>
