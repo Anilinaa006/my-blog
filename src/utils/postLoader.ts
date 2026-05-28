@@ -32,6 +32,10 @@ const postModules: Record<string, () => Promise<{ default: string }>> = {
     import("../assets/posts/其他/Vue和React的区别.md?raw"),
   关于TS: () => import("../assets/posts/JS/关于TS.md?raw"),
   "Ant Design": () => import("../assets/posts/其他/Ant Design.md?raw"),
+  事件循环: () => import("../assets/posts/JS/事件循环.md?raw"),
+  事件冒泡: () => import("../assets/posts/JS/事件冒泡.md?raw"),
+  React和ts结合: () =>
+    import("../assets/posts/React/React和ts结合的使用.md?raw"),
 };
 
 interface PostModule {
