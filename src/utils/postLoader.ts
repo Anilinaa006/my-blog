@@ -36,7 +36,8 @@ const postModules: Record<string, () => Promise<{ default: string }>> = {
   事件冒泡: () => import("../assets/posts/JS/事件冒泡.md?raw"),
   React和ts结合: () =>
     import("../assets/posts/React/React和ts结合的使用.md?raw"),
-  "React路由": () => import("../assets/posts/React/React路由.md?raw"),
+  React路由: () => import("../assets/posts/React/React路由.md?raw"),
+  webpack原理: () => import("../assets/posts/其他/webpack原理.md?raw"),
 };
 
 interface PostModule {
