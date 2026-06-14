@@ -5,7 +5,7 @@ import { ApiError } from "../utils/errors";
 
 const router: RouterType = Router();
 
-// 获取文章评论
+// 获取文章评论（包含点赞数）
 router.get("/", async (req: Request, res: Response) => {
   try {
     const { postId } = req.query;
@@ -15,7 +15,26 @@ router.get("/", async (req: Request, res: Response) => {
     }
 
     const [rows] = await pool.query<any[]>(
-      "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id WHERE c.post_id = ? ORDER BY c.created_at DESC",
+      `
+      SELECT 
+        c.id, 
+        c.post_id as postId, 
+        c.user_id as userId, 
+        u.username, 
+        c.content, 
+        c.created_at as createdAt, 
+        c.updated_at as updatedAt,
+        COALESCE(l.like_count, 0) as likeCount
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      LEFT JOIN (
+        SELECT comment_id, COUNT(*) as like_count
+        FROM comment_likes
+        GROUP BY comment_id
+      ) l ON c.id = l.comment_id
+      WHERE c.post_id = ?
+      ORDER BY c.created_at DESC
+    `,
       [postId]
     );
 
@@ -119,6 +138,126 @@ router.delete("/:id", verifyToken, async (req: Request, res: Response) => {
     await pool.query("DELETE FROM comments WHERE id = ?", [id]);
 
     res.json({ message: "删除成功" });
+  } catch (error: any) {
+    res.status(error.status || 500).json({ error: error.message || "服务器错误" });
+  }
+});
+
+// 点赞评论
+router.post("/:id/like", verifyToken, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user!.id;
+
+    await pool.query(
+      "INSERT IGNORE INTO comment_likes (comment_id, user_id) VALUES (?, ?)",
+      [id, userId]
+    );
+
+    const [result] = await pool.query<any[]>(
+      "SELECT COUNT(*) as likeCount FROM comment_likes WHERE comment_id = ?",
+      [id]
+    );
+
+    res.json({ likeCount: result[0].likeCount, liked: true });
+  } catch (error: any) {
+    res.status(error.status || 500).json({ error: error.message || "服务器错误" });
+  }
+});
+
+// 取消点赞
+router.delete("/:id/like", verifyToken, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user!.id;
+
+    await pool.query(
+      "DELETE FROM comment_likes WHERE comment_id = ? AND user_id = ?",
+      [id, userId]
+    );
+
+    const [result] = await pool.query<any[]>(
+      "SELECT COUNT(*) as likeCount FROM comment_likes WHERE comment_id = ?",
+      [id]
+    );
+
+    res.json({ likeCount: result[0].likeCount, liked: false });
+  } catch (error: any) {
+    res.status(error.status || 500).json({ error: error.message || "服务器错误" });
+  }
+});
+
+// 获取评论的回复
+router.get("/:id/replies", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const [replies] = await pool.query<any[]>(
+      `
+      SELECT 
+        cr.id, 
+        cr.comment_id as commentId, 
+        cr.user_id as userId, 
+        u.username, 
+        cr.reply_to_user_id as replyToUserId, 
+        ru.username as replyToUsername,
+        cr.content, 
+        cr.created_at as createdAt, 
+        cr.updated_at as updatedAt
+      FROM comment_replies cr
+      JOIN users u ON cr.user_id = u.id
+      LEFT JOIN users ru ON cr.reply_to_user_id = ru.id
+      WHERE cr.comment_id = ?
+      ORDER BY cr.created_at ASC
+    `,
+      [id]
+    );
+
+    res.json(replies);
+  } catch (error: any) {
+    res.status(error.status || 500).json({ error: error.message || "服务器错误" });
+  }
+});
+
+// 回复评论
+router.post("/:id/replies", verifyToken, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { content, replyToUserId } = req.body;
+    const userId = req.user!.id;
+
+    if (!content) {
+      throw new ApiError(400, "缺少回复内容");
+    }
+
+    const [result]: any = await pool.query(
+      "INSERT INTO comment_replies (comment_id, user_id, reply_to_user_id, content) VALUES (?, ?, ?, ?)",
+      [id, userId, replyToUserId || null, content]
+    );
+
+    const replyId = result.insertId as number;
+
+    const [replies] = await pool.query<any[]>(
+      `
+      SELECT 
+        cr.id, 
+        cr.comment_id as commentId, 
+        cr.user_id as userId, 
+        u.username, 
+        cr.reply_to_user_id as replyToUserId, 
+        ru.username as replyToUsername,
+        cr.content, 
+        cr.created_at as createdAt, 
+        cr.updated_at as updatedAt
+      FROM comment_replies cr
+      JOIN users u ON cr.user_id = u.id
+      LEFT JOIN users ru ON cr.reply_to_user_id = ru.id
+      WHERE cr.id = ?
+    `,
+      [replyId]
+    );
+
+    res.status(201).json(replies[0]);
   } catch (error: any) {
     res.status(error.status || 500).json({ error: error.message || "服务器错误" });
   }

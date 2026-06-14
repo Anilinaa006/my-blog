@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <el-container class="post-detail-container">
     <div class="fixed-navbar">
       <div class="navbar-content">
@@ -24,7 +24,9 @@
                 </div>
                 <div class="post-reading-time">
                   <el-icon><Timer /></el-icon>
-                  <span>{{ Math.ceil(post.contentLength / 500) }} 分钟阅读</span>
+                  <span
+                    >{{ Math.ceil(post.contentLength / 500) }} 分钟阅读</span
+                  >
                 </div>
               </div>
             </div>
@@ -96,13 +98,25 @@
                   <span class="username">{{ comment.username }}</span>
                 </div>
                 <div class="comment-time">
-                  {{ formatCommentDate(comment.created_at) }}
+                  {{ formatCommentDate(comment.createdAt) }}
                 </div>
               </div>
               <div class="comment-content">{{ comment.content }}</div>
+              <div class="comment-interactions">
+                <div class="comment-like" @click="handleLikeComment(comment)">
+                  <el-icon :class="{ liked: likedComments.has(comment.id) }">
+                    <Star />
+                  </el-icon>
+                  <span>{{ comment.likeCount || 0 }}</span>
+                </div>
+                <div class="comment-reply" @click="toggleReplyForm(comment.id)">
+                  <el-icon><Message /></el-icon>
+                  <span>{{ getCommentReplyCount(comment.id) }} 回复</span>
+                </div>
+              </div>
               <div
                 class="comment-actions"
-                v-if="isLoggedIn && comment.user_id === currentUserId"
+                v-if="isLoggedIn && comment.userId === currentUserId"
               >
                 <el-button size="small" @click="handleEditComment(comment)">
                   <el-icon><Edit /></el-icon>
@@ -143,6 +157,71 @@
                   </el-button>
                 </div>
               </div>
+              <div
+                class="reply-form"
+                v-if="replyingCommentId === comment.id && isLoggedIn"
+              >
+                <el-input
+                  v-model="replyContentMap[comment.id]"
+                  type="textarea"
+                  :rows="2"
+                  placeholder="输入回复内容"
+                  maxlength="500"
+                  show-word-limit
+                />
+                <div class="reply-form-actions">
+                  <el-button
+                    size="small"
+                    @click="
+                      replyingCommentId = null;
+                      replyContentMap[comment.id] = '';
+                    "
+                  >
+                    取消
+                  </el-button>
+                  <el-button
+                    size="small"
+                    type="primary"
+                    @click="handleSubmitReply(comment.id)"
+                    :loading="submittingReplyId === comment.id"
+                  >
+                    回复
+                  </el-button>
+                </div>
+              </div>
+              <div
+                class="replies-list"
+                v-if="getCommentReplies(comment.id).length > 0"
+              >
+                <div
+                  v-for="reply in getCommentReplies(comment.id)"
+                  :key="reply.id"
+                  class="reply-item"
+                >
+                  <div class="reply-header">
+                    <el-avatar
+                      :size="24"
+                      :src="`https://ui-avatars.com/api/?name=${reply.username}&background=409eff&color=fff`"
+                    />
+                    <span class="reply-username">{{ reply.username }}</span>
+                    <span v-if="reply.replyToUsername" class="reply-to">
+                      回复 {{ reply.replyToUsername }}
+                    </span>
+                    <span class="reply-time">{{
+                      formatCommentDate(reply.createdAt)
+                    }}</span>
+                  </div>
+                  <div class="reply-content">{{ reply.content }}</div>
+                  <div
+                    class="reply-action"
+                    v-if="isLoggedIn && reply.userId !== currentUserId"
+                    @click="toggleReplyForm(comment.id, reply)"
+                  >
+                    <el-icon><Message /></el-icon>
+                    <span>回复</span>
+                  </div>
+                </div>
+              </div>
             </el-card>
           </div>
           <div class="no-comments" v-else>
@@ -155,7 +234,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getPostMetadata, parseMarkdown } from "../utils/markdown";
@@ -168,6 +247,8 @@ import {
   User,
   Edit,
   Delete,
+  Star,
+  Message,
 } from "@element-plus/icons-vue";
 
 const route = useRoute();
@@ -175,11 +256,17 @@ const router = useRouter();
 const post = ref<any>(null);
 
 const comments = ref<any[]>([]);
+const commentReplies = ref<Map<number, any[]>>(new Map());
 const commentContent = ref("");
 const submittingComment = ref(false);
 const editingCommentId = ref<number | null>(null);
 const editCommentContent = ref("");
 const editingComment = ref(false);
+const likedComments = ref<Set<number>>(new Set());
+const replyContentMap = reactive<Record<number, string>>({});
+const replyingCommentId = ref<number | null>(null);
+const submittingReplyId = ref<number | null>(null);
+const replyToReply = ref<any>(null);
 
 const isLoggedIn = computed(() => authAPI.isLoggedIn());
 const currentUserId = computed(() => {
@@ -216,10 +303,30 @@ const loadComments = async () => {
     const postId = route.params.id as string;
     const data = await commentAPI.getComments(postId);
     comments.value = data;
+    for (const comment of data) {
+      await loadCommentReplies(comment.id);
+    }
   } catch (error: any) {
     console.error("加载评论失败:", error);
     ElMessage.error(error.message || "加载评论失败");
   }
+};
+
+const loadCommentReplies = async (commentId: number) => {
+  try {
+    const replies = await commentAPI.getCommentReplies(commentId);
+    commentReplies.value.set(commentId, replies);
+  } catch (error: any) {
+    console.error("加载回复失败:", error);
+  }
+};
+
+const getCommentReplies = (commentId: number) => {
+  return commentReplies.value.get(commentId) || [];
+};
+
+const getCommentReplyCount = (commentId: number) => {
+  return getCommentReplies(commentId).length;
 };
 
 const handleSubmitComment = async () => {
@@ -324,6 +431,78 @@ const formatCommentDate = (dateString: string) => {
     hour: "2-digit",
     minute: "2-digit",
   });
+};
+
+const handleLikeComment = async (comment: any) => {
+  if (!isLoggedIn.value) {
+    ElMessage.warning("请先登录");
+    return;
+  }
+
+  try {
+    if (likedComments.value.has(comment.id)) {
+      const result = await commentAPI.unlikeComment(comment.id);
+      comment.likeCount = result.likeCount;
+      likedComments.value.delete(comment.id);
+    } else {
+      const result = await commentAPI.likeComment(comment.id);
+      comment.likeCount = result.likeCount;
+      likedComments.value.add(comment.id);
+    }
+  } catch (error: any) {
+    console.error("点赞失败:", error);
+    ElMessage.error(error.message || "点赞失败");
+  }
+};
+
+const toggleReplyForm = (commentId: number, reply?: any) => {
+  if (!isLoggedIn.value) {
+    ElMessage.warning("请先登录");
+    return;
+  }
+
+  if (replyingCommentId.value === commentId) {
+    replyingCommentId.value = null;
+    replyToReply.value = null;
+  } else {
+    replyingCommentId.value = commentId;
+    replyToReply.value = reply || null;
+    if (!replyContentMap[commentId]) {
+      replyContentMap[commentId] = "";
+    }
+  }
+};
+
+const handleSubmitReply = async (commentId: number) => {
+  const content = replyContentMap[commentId];
+  if (!content.trim()) {
+    ElMessage.warning("请输入回复内容");
+    return;
+  }
+
+  try {
+    submittingReplyId.value = commentId;
+    const replyToUserId = replyToReply.value?.userId || undefined;
+    const newReply = await commentAPI.createReply(
+      commentId,
+      content,
+      replyToUserId,
+    );
+
+    const replies = commentReplies.value.get(commentId) || [];
+    replies.push(newReply);
+    commentReplies.value.set(commentId, replies);
+
+    replyContentMap[commentId] = "";
+    replyingCommentId.value = null;
+    replyToReply.value = null;
+    ElMessage.success("回复成功");
+  } catch (error: any) {
+    console.error("回复失败:", error);
+    ElMessage.error(error.message || "回复失败");
+  } finally {
+    submittingReplyId.value = null;
+  }
 };
 
 const handleBack = () => {
@@ -1042,6 +1221,42 @@ onMounted(() => {
   color: #e0e0e0;
 }
 
+.comment-interactions {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.comment-like,
+.comment-reply {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  color: #666;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.comment-like:hover,
+.comment-reply:hover {
+  color: #409eff;
+}
+
+.comment-like .liked {
+  color: #f56c6c;
+}
+
+.dark .comment-like,
+.dark .comment-reply {
+  color: #909399;
+}
+
+.dark .comment-like:hover,
+.dark .comment-reply:hover {
+  color: #79bbff;
+}
+
 .comment-actions {
   display: flex;
   gap: 0.5rem;
@@ -1069,6 +1284,112 @@ onMounted(() => {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
+}
+
+.reply-form {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.dark .reply-form {
+  border-top-color: #303030;
+}
+
+.reply-form-actions {
+  margin-top: 0.8rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.replies-list {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e9ecef;
+}
+
+.dark .replies-list {
+  border-top-color: #303030;
+}
+
+.reply-item {
+  padding: 0.8rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+}
+
+.dark .reply-item {
+  background-color: #2a2e35;
+}
+
+.reply-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.reply-username {
+  font-weight: 600;
+  color: #333;
+}
+
+.dark .reply-username {
+  color: #e0e0e0;
+}
+
+.reply-to {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.dark .reply-to {
+  color: #909399;
+}
+
+.reply-time {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.dark .reply-time {
+  color: #606266;
+}
+
+.reply-content {
+  color: #333;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.dark .reply-content {
+  color: #d6dbe1;
+}
+
+.reply-action {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  color: #666;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.reply-action:hover {
+  color: #409eff;
+}
+
+.dark .reply-action {
+  color: #909399;
+}
+
+.dark .reply-action:hover {
+  color: #79bbff;
 }
 
 .no-comments {
@@ -1126,4 +1447,3 @@ onMounted(() => {
   }
 }
 </style>
-

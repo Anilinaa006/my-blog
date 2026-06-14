@@ -41,6 +41,38 @@ const initSchema = async () => {
       INDEX idx_user_id (user_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+    // comment_likes: 评论点赞
+    await exports.pool.query(`
+    CREATE TABLE IF NOT EXISTS comment_likes (
+      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+      comment_id BIGINT NOT NULL,
+      user_id BIGINT NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT fk_comment_likes_comment FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+      CONSTRAINT fk_comment_likes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      UNIQUE KEY uk_comment_like (comment_id, user_id),
+      INDEX idx_comment_likes_comment_id (comment_id),
+      INDEX idx_comment_likes_user_id (user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
+    // comment_replies: 评论回复
+    await exports.pool.query(`
+    CREATE TABLE IF NOT EXISTS comment_replies (
+      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+      comment_id BIGINT NOT NULL,
+      user_id BIGINT NOT NULL,
+      reply_to_user_id BIGINT NULL,
+      content TEXT NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NULL,
+      CONSTRAINT fk_comment_replies_comment FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+      CONSTRAINT fk_comment_replies_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CONSTRAINT fk_comment_replies_reply_to FOREIGN KEY (reply_to_user_id) REFERENCES users(id) ON DELETE SET NULL,
+      INDEX idx_comment_replies_comment_id (comment_id),
+      INDEX idx_comment_replies_user_id (user_id),
+      INDEX idx_comment_replies_reply_to (reply_to_user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
 };
 exports.initSchema = initSchema;
 //# sourceMappingURL=db.js.map

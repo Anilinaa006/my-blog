@@ -1,0 +1,207 @@
+var e=`---
+title: 深入理解 JavaScript 事件循环
+date: 2026-05-27
+categories: JavaScript
+---
+
+# 深入理解 JavaScript 事件循环
+
+## 什么是事件循环？
+
+JavaScript 是一门单线程语言，这意味着它同一时间只能执行一个任务。但在实际应用中，我们经常需要处理异步操作，比如网络请求、定时器、DOM事件等。事件循环（Event Loop）就是 JavaScript 实现异步编程的核心机制。
+
+## JavaScript 运行时环境
+
+要理解事件循环，首先需要了解 JavaScript 的运行时环境：
+
+### 调用栈（Call Stack）
+
+调用栈是一个 LIFO（后进先出）的数据结构，用于存储正在执行的函数调用。当执行一个函数时，它会被压入栈顶；当函数执行完毕时，它会被弹出栈。
+
+### 任务队列（Task Queue）
+
+任务队列分为两种：
+
+1. **宏任务队列（Macro Task Queue）**：包含 setTimeout、setInterval、setImmediate、I/O 操作、UI 渲染等
+2. **微任务队列（Micro Task Queue）**：包含 Promise.then、Promise.catch、Promise.finally、MutationObserver 等
+
+## 事件循环的执行顺序
+
+事件循环的执行顺序如下：
+
+1. 执行同步代码（调用栈中的任务）
+2. 清空微任务队列
+3. 执行宏任务队列中的一个任务
+4. 重复步骤 2-3
+
+### 示例
+
+\`\`\`javascript
+console.log('1'); // 同步代码
+
+setTimeout(() => {
+  console.log('2'); // 宏任务
+}, 0);
+
+Promise.resolve().then(() => {
+  console.log('3'); // 微任务
+});
+
+console.log('4'); // 同步代码
+
+// 输出顺序：1, 4, 3, 2
+\`\`\`
+
+## 宏任务 vs 微任务
+
+### 宏任务
+
+宏任务通常是比较大的任务，包括：
+
+- \`setTimeout\`
+- \`setInterval\`
+- \`setImmediate\`（Node.js）
+- \`requestAnimationFrame\`
+- I/O 操作
+- UI 渲染
+
+### 微任务
+
+微任务通常是较小的任务，包括：
+
+- \`Promise.then\`
+- \`Promise.catch\`
+- \`Promise.finally\`
+- \`MutationObserver\`
+- \`queueMicrotask\`
+
+### 执行顺序
+
+在每次执行完一个宏任务后，会清空所有微任务队列中的任务，然后再执行下一个宏任务。
+
+## 事件循环的详细流程
+
+\`\`\`
+┌─────────────────────────────────────────────────────────────────────┐
+│                        事件循环流程                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. 执行同步代码（调用栈）                                           │
+│         ↓                                                          │
+│  2. 清空微任务队列                                                  │
+│         ↓                                                          │
+│  3. 执行一个宏任务                                                  │
+│         ↓                                                          │
+│  4. 清空微任务队列                                                  │
+│         ↓                                                          │
+│  5. 重复步骤 3-4                                                   │
+└─────────────────────────────────────────────────────────────────────┘
+\`\`\`
+
+## 实战示例
+
+### 示例 1：基础事件循环
+
+\`\`\`javascript
+console.log('Start');
+
+setTimeout(() => {
+  console.log('Timeout');
+}, 0);
+
+Promise.resolve().then(() => {
+  console.log('Promise');
+});
+
+console.log('End');
+
+// 输出：Start, End, Promise, Timeout
+\`\`\`
+
+### 示例 2：嵌套微任务
+
+\`\`\`javascript
+console.log('1');
+
+Promise.resolve().then(() => {
+  console.log('2');
+  Promise.resolve().then(() => {
+    console.log('3');
+  });
+});
+
+Promise.resolve().then(() => {
+  console.log('4');
+});
+
+console.log('5');
+
+// 输出：1, 5, 2, 4, 3
+\`\`\`
+
+### 示例 3：async/await
+
+\`\`\`javascript
+async function async1() {
+  console.log('async1 start');
+  await async2();
+  console.log('async1 end');
+}
+
+async function async2() {
+  console.log('async2');
+}
+
+console.log('script start');
+
+setTimeout(() => {
+  console.log('setTimeout');
+}, 0);
+
+async1();
+
+Promise.resolve().then(() => {
+  console.log('Promise');
+});
+
+console.log('script end');
+
+// 输出：script start, async1 start, async2, script end, async1 end, Promise, setTimeout
+\`\`\`
+
+## 常见误区
+
+### 误区 1：setTimeout 的延迟时间是准确的
+
+实际上，\`setTimeout\` 的延迟时间只是最小延迟时间，实际执行时间可能会更长，因为它需要等待调用栈为空和微任务队列清空。
+
+### 误区 2：微任务只执行一次
+
+实际上，在清空微任务队列时，如果新的微任务被添加，它们也会被执行，直到微任务队列为空。
+
+### 误区 3：Promise 是同步的
+
+\`new Promise()\` 构造函数中的代码是同步执行的，只有 \`.then()\` 中的代码才是异步的。
+
+## 事件循环的重要性
+
+理解事件循环对于编写高效的 JavaScript 代码至关重要，特别是在处理异步操作时。正确理解事件循环可以帮助我们：
+
+1. 避免回调地狱
+2. 优化代码执行顺序
+3. 理解异步代码的执行时机
+4. 调试复杂的异步问题
+
+## 总结
+
+事件循环是 JavaScript 异步编程的核心机制，它通过调用栈、宏任务队列和微任务队列来协调同步和异步代码的执行顺序。理解事件循环的工作原理，可以帮助我们更好地编写和调试异步代码。
+
+---
+
+**要点回顾**：
+- JavaScript 是单线程语言
+- 事件循环分为调用栈、宏任务队列和微任务队列
+- 执行顺序：同步代码 → 微任务 → 宏任务 → 微任务 → ...
+- 微任务优先于宏任务执行
+
+掌握事件循环，让你的 JavaScript 代码更加高效和可靠！
+`;export{e as default};

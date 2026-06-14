@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <header class="header" :class="{ 'header-scrolled': isScrolled }">
     <div class="container">
       <h1 class="logo">
@@ -14,7 +14,7 @@
           :class="{ 'nav-mobile': isMobile, 'nav-open': isNavOpen }"
         >
           <router-link to="/" class="nav-link" @click="closeNav">首页</router-link>
-          <router-link to="/about" class="nav-link" @click="closeNav">关于我</router-link>
+          <router-link to="/about" class="nav-link" @click="closeNav">关于作者</router-link>
           <router-link to="/blog-intro" class="nav-link" @click="closeNav">
             博客介绍
           </router-link>

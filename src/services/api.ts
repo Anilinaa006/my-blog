@@ -1,4 +1,4 @@
-﻿const API_BASE_URL = "/api";
+const API_BASE_URL = "/api";
 interface AuthResponse {
   token: string;
   user: {
@@ -24,12 +24,30 @@ type ApiErrorPayload = {
 
 interface Comment {
   id: number;
-  post_id: string;
-  user_id: number;
+  postId: string;
+  userId: number;
   username: string;
   content: string;
-  created_at: string;
-  updated_at: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+  likeCount: number;
+}
+
+interface CommentReply {
+  id: number;
+  commentId: number;
+  userId: number;
+  username: string;
+  replyToUserId: number | null;
+  replyToUsername: string | null;
+  content: string;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+interface LikeResponse {
+  likeCount: number;
+  liked: boolean;
 }
 
 async function readResponseData<T>(
@@ -67,7 +85,9 @@ async function login(data: LoginData): Promise<AuthResponse> {
   const payload = await readResponseData<AuthResponse>(response);
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(payload as ApiErrorPayload | null, "登录失败"));
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "登录失败"),
+    );
   }
 
   if (!payload) {
@@ -89,7 +109,9 @@ async function register(data: RegisterData): Promise<AuthResponse> {
   const payload = await readResponseData<AuthResponse>(response);
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(payload as ApiErrorPayload | null, "注册失败"));
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "注册失败"),
+    );
   }
 
   if (!payload) {
@@ -99,7 +121,10 @@ async function register(data: RegisterData): Promise<AuthResponse> {
   return payload as AuthResponse;
 }
 
-function saveToken(token: string, user: { id: number; username: string }): void {
+function saveToken(
+  token: string,
+  user: { id: number; username: string },
+): void {
   localStorage.setItem("auth_token", token);
   localStorage.setItem("user", JSON.stringify(user));
 }
@@ -128,7 +153,9 @@ async function getComments(postId: string): Promise<Comment[]> {
     const payload = await readResponseData<Comment[]>(response);
 
     if (!response.ok) {
-      throw new Error(getErrorMessage(payload as ApiErrorPayload | null, "获取评论失败"));
+      throw new Error(
+        getErrorMessage(payload as ApiErrorPayload | null, "获取评论失败"),
+      );
     }
 
     return (payload as Comment[]) ?? [];
@@ -137,7 +164,10 @@ async function getComments(postId: string): Promise<Comment[]> {
   }
 }
 
-async function createComment(postId: string, content: string): Promise<Comment> {
+async function createComment(
+  postId: string,
+  content: string,
+): Promise<Comment> {
   const token = getToken();
 
   if (!token) {
@@ -156,7 +186,9 @@ async function createComment(postId: string, content: string): Promise<Comment> 
   const payload = await readResponseData<Comment>(response);
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(payload as ApiErrorPayload | null, "创建评论失败"));
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "创建评论失败"),
+    );
   }
 
   if (!payload) {
@@ -166,7 +198,10 @@ async function createComment(postId: string, content: string): Promise<Comment> 
   return payload as Comment;
 }
 
-async function updateComment(commentId: number, content: string): Promise<Comment> {
+async function updateComment(
+  commentId: number,
+  content: string,
+): Promise<Comment> {
   const token = getToken();
 
   if (!token) {
@@ -185,7 +220,9 @@ async function updateComment(commentId: number, content: string): Promise<Commen
   const payload = await readResponseData<Comment>(response);
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(payload as ApiErrorPayload | null, "更新评论失败"));
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "更新评论失败"),
+    );
   }
 
   if (!payload) {
@@ -202,20 +239,149 @@ async function deleteComment(commentId: number): Promise<{ message: string }> {
     throw new Error("请先登录");
   }
 
+  const user = getUser();
+
   const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
     method: "DELETE",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify({ userId: user?.id }),
   });
 
   const payload = await readResponseData<{ message: string }>(response);
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(payload as ApiErrorPayload | null, "删除评论失败"));
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "删除评论失败"),
+    );
   }
 
   return (payload as { message: string }) ?? { message: "删除成功" };
+}
+
+async function likeComment(commentId: number): Promise<LikeResponse> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("请先登录");
+  }
+
+  const user = getUser();
+
+  const response = await fetch(`${API_BASE_URL}/comments/${commentId}/like`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ userId: user?.id }),
+  });
+
+  const payload = await readResponseData<LikeResponse>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "点赞失败"),
+    );
+  }
+
+  if (!payload) {
+    throw new Error("点赞接口未返回数据");
+  }
+
+  return payload as LikeResponse;
+}
+
+async function unlikeComment(commentId: number): Promise<LikeResponse> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("请先登录");
+  }
+
+  const user = getUser();
+
+  const response = await fetch(`${API_BASE_URL}/comments/${commentId}/like`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ userId: user?.id }),
+  });
+
+  const payload = await readResponseData<LikeResponse>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "取消点赞失败"),
+    );
+  }
+
+  if (!payload) {
+    throw new Error("取消点赞接口未返回数据");
+  }
+
+  return payload as LikeResponse;
+}
+
+async function getCommentReplies(commentId: number): Promise<CommentReply[]> {
+  const response = await fetch(`${API_BASE_URL}/comments/${commentId}/replies`);
+  const payload = await readResponseData<CommentReply[]>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "获取回复失败"),
+    );
+  }
+
+  return (payload as CommentReply[]) ?? [];
+}
+
+async function createReply(
+  commentId: number,
+  content: string,
+  replyToUserId?: number,
+): Promise<CommentReply> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("请先登录");
+  }
+
+  const user = getUser();
+
+  const response = await fetch(
+    `${API_BASE_URL}/comments/${commentId}/replies`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userId: user?.id,
+        content,
+        replyToUserId: replyToUserId || null,
+      }),
+    },
+  );
+
+  const payload = await readResponseData<CommentReply>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "回复失败"),
+    );
+  }
+
+  if (!payload) {
+    throw new Error("回复接口未返回数据");
+  }
+
+  return payload as CommentReply;
 }
 
 export const authAPI = {
@@ -233,6 +399,8 @@ export const commentAPI = {
   createComment,
   updateComment,
   deleteComment,
+  likeComment,
+  unlikeComment,
+  getCommentReplies,
+  createReply,
 };
-
-
