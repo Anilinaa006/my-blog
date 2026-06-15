@@ -55,7 +55,7 @@ router.post(
     const body = loginBody.parse(req.body);
 
     const [rows] = await pool.query<any[]>(
-      "SELECT id, password_hash FROM users WHERE username = ? LIMIT 1",
+      "SELECT id, password_hash, avatar_url FROM users WHERE username = ? LIMIT 1",
       [body.username]
     );
     const user = rows[0];
@@ -72,7 +72,11 @@ router.post(
 
     return res.json({
       token,
-      user: { id: user.id as number, username: body.username }
+      user: { 
+        id: user.id as number, 
+        username: body.username,
+        avatarUrl: user.avatar_url || null
+      }
     });
   })
 );

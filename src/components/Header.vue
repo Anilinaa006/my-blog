@@ -26,7 +26,9 @@
           <template v-if="isLoggedIn">
             <el-dropdown class="user-dropdown" trigger="click">
               <span class="nav-user">
-                <el-avatar :size="28" :src="userAvatar" />
+                <el-avatar :size="28" :src="userAvatar">
+                  {{ defaultAvatarText }}
+                </el-avatar>
                 <span class="username">{{ user?.username }}</span>
               </span>
               <template #dropdown>
@@ -82,13 +84,19 @@ const user = ref(authAPI.getUser());
 
 const userAvatar = computed(() => {
   if (user.value?.avatarUrl) {
-    if (user.value.avatarUrl.startsWith("http")) {
-      return user.value.avatarUrl;
+    const url = user.value.avatarUrl;
+    if (url.startsWith("http")) {
+      return url;
     }
-    return `http://localhost:3001${user.value.avatarUrl}`;
+    return `http://localhost:3001${url}`;
   }
+  return "";
+});
+
+const defaultAvatarText = computed(() => {
   if (user.value?.username) {
-    return `https://ui-avatars.com/api/?name=${user.value.username}&background=409eff&color=fff&size=28`;
+    const name = user.value.username;
+    return name.substring(0, 2).toUpperCase();
   }
   return "";
 });
