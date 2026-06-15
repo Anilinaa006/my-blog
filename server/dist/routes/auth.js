@@ -11,6 +11,8 @@ const env_1 = __importDefault(require("../env"));
 const db_1 = require("../db");
 const errors_1 = require("../utils/errors");
 const asyncHandler_1 = require("../utils/asyncHandler");
+const auth_1 = require("../middleware/auth");
+const upload_1 = require("../utils/upload");
 const router = (0, express_1.Router)();
 const registerBody = zod_1.z.object({
     username: zod_1.z.string().min(3).max(50),
@@ -44,6 +46,35 @@ router.post("/login", (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     return res.json({
         token,
         user: { id: user.id, username: body.username }
+    });
+}));
+// 获取当前用户信息
+router.get("/me", auth_1.verifyToken, (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const userId = req.user.id;
+    const [rows] = await db_1.pool.query("SELECT id, username, avatar_url, created_at FROM users WHERE id = ?", [userId]);
+    if (rows.length === 0) {
+        throw new errors_1.ApiError(404, "用户不存在");
+    }
+    const user = rows[0];
+    return res.json({
+        id: user.id,
+        username: user.username,
+        avatarUrl: user.avatar_url,
+        createdAt: user.created_at
+    });
+}));
+// 上传头像
+router.post("/avatar", auth_1.verifyToken, upload_1.upload.single("avatar"), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    if (!req.file) {
+        throw new errors_1.ApiError(400, "请选择图片文件");
+    }
+    const userId = req.user.id;
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    // 更新用户头像URL
+    await db_1.pool.query("UPDATE users SET avatar_url = ? WHERE id = ?", [avatarUrl, userId]);
+    return res.json({
+        avatarUrl,
+        message: "头像上传成功"
     });
 }));
 exports.default = router;

@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
 import env from "./env";
 import { initSchema, pool } from "./db";
 import authRoutes from "./routes/auth";
@@ -17,6 +18,9 @@ app.use(
   }),
 );
 app.use(express.json({ limit: "2mb" }));
+
+// 静态文件服务 - 头像图片
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 

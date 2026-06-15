@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const path_1 = __importDefault(require("path"));
 const env_1 = __importDefault(require("./env"));
 const db_1 = require("./db");
 const auth_1 = __importDefault(require("./routes/auth"));
@@ -18,6 +19,8 @@ app.use((0, cors_1.default)({
     credentials: false,
 }));
 app.use(express_1.default.json({ limit: "2mb" }));
+// 静态文件服务 - 头像图片
+app.use("/uploads", express_1.default.static(path_1.default.join(process.cwd(), "uploads")));
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 app.use("/api/auth", auth_1.default);
 app.use("/api/comments", comment_1.default);

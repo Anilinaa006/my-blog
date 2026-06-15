@@ -50,6 +50,13 @@ interface LikeResponse {
   liked: boolean;
 }
 
+interface UserInfo {
+  id: number;
+  username: string;
+  avatarUrl: string | null;
+  createdAt: string;
+}
+
 async function readResponseData<T>(
   response: Response,
 ): Promise<T | ApiErrorPayload | null> {
@@ -133,7 +140,7 @@ function getToken(): string | null {
   return localStorage.getItem("auth_token");
 }
 
-function getUser(): { id: number; username: string } | null {
+function getUser(): { id: number; username: string; avatarUrl?: string } | null {
   const userStr = localStorage.getItem("user");
   return userStr ? JSON.parse(userStr) : null;
 }
@@ -145,6 +152,65 @@ function removeToken(): void {
 
 function isLoggedIn(): boolean {
   return !!getToken();
+}
+
+async function getUserInfo(): Promise<UserInfo> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("请先登录");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = await readResponseData<UserInfo>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "获取用户信息失败"),
+    );
+  }
+
+  if (!payload) {
+    throw new Error("获取用户信息接口未返回数据");
+  }
+
+  return payload as UserInfo;
+}
+
+async function changePassword(
+  oldPassword: string,
+  newPassword: string,
+): Promise<{ message: string }> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("请先登录");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ oldPassword, newPassword }),
+  });
+
+  const payload = await readResponseData<{ message: string }>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "修改密码失败"),
+    );
+  }
+
+  return (payload as { message: string }) ?? { message: "密码修改成功" };
 }
 
 async function getComments(postId: string): Promise<Comment[]> {
@@ -392,6 +458,8 @@ export const authAPI = {
   getUser,
   removeToken,
   isLoggedIn,
+  getUserInfo,
+  changePassword,
 };
 
 export const commentAPI = {

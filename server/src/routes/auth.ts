@@ -6,6 +6,8 @@ import env from "../env";
 import { pool } from "../db";
 import { ApiError } from "../utils/errors";
 import { asyncHandler } from "../utils/asyncHandler";
+import { verifyToken } from "../middleware/auth";
+import { upload } from "../utils/upload";
 
 const router: RouterType = Router();
 
@@ -71,6 +73,111 @@ router.post(
     return res.json({
       token,
       user: { id: user.id as number, username: body.username }
+    });
+  })
+);
+
+// 获取当前用户信息
+router.get(
+  "/me",
+  verifyToken,
+  asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+
+    const [rows] = await pool.query<any[]>(
+      "SELECT id, username, avatar_url, created_at FROM users WHERE id = ?",
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      throw new ApiError(404, "用户不存在");
+    }
+
+    const user = rows[0];
+    return res.json({
+      id: user.id,
+      username: user.username,
+      avatarUrl: user.avatar_url,
+      createdAt: user.created_at
+    });
+  })
+);
+
+// 上传头像
+router.post(
+  "/avatar",
+  verifyToken,
+  upload.single("avatar"),
+  asyncHandler(async (req, res) => {
+    if (!req.file) {
+      throw new ApiError(400, "请选择图片文件");
+    }
+
+    const userId = req.user!.id;
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+    // 更新用户头像URL
+    await pool.query(
+      "UPDATE users SET avatar_url = ? WHERE id = ?",
+      [avatarUrl, userId]
+    );
+
+    return res.json({
+      avatarUrl,
+      message: "头像上传成功"
+    });
+  })
+);
+
+// 修改密码
+router.post(
+  "/change-password",
+  verifyToken,
+  asyncHandler(async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user!.id;
+
+    if (!oldPassword || !newPassword) {
+      throw new ApiError(400, "请填写旧密码和新密码");
+    }
+
+    if (newPassword.length < 8) {
+      throw new ApiError(400, "新密码至少需要8个字符");
+    }
+
+    // 获取当前密码哈希
+    const [rows] = await pool.query<any[]>(
+      "SELECT password_hash FROM users WHERE id = ?",
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      throw new ApiError(404, "用户不存在");
+    }
+
+    const user = rows[0];
+
+    // 验证旧密码
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password_hash);
+    if (!isOldPasswordValid) {
+      throw new ApiError(400, "旧密码不正确");
+    }
+
+    // 检查新密码是否与旧密码相同
+    const isSamePassword = await bcrypt.compare(newPassword, user.password_hash);
+    if (isSamePassword) {
+      throw new ApiError(400, "新密码不能与旧密码相同");
+    }
+
+    // 更新密码
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    await pool.query(
+      "UPDATE users SET password_hash = ? WHERE id = ?",
+      [newPasswordHash, userId]
+    );
+
+    return res.json({
+      message: "密码修改成功"
     });
   })
 );

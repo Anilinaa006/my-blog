@@ -13,21 +13,43 @@
           class="nav"
           :class="{ 'nav-mobile': isMobile, 'nav-open': isNavOpen }"
         >
-          <router-link to="/" class="nav-link" @click="closeNav">首页</router-link>
-          <router-link to="/about" class="nav-link" @click="closeNav">关于作者</router-link>
+          <router-link to="/" class="nav-link" @click="closeNav"
+            >首页</router-link
+          >
+          <router-link to="/about" class="nav-link" @click="closeNav"
+            >关于作者</router-link
+          >
           <router-link to="/blog-intro" class="nav-link" @click="closeNav">
             博客介绍
           </router-link>
 
           <template v-if="isLoggedIn">
-            <span class="nav-user">
-              <el-icon><User /></el-icon>
-              {{ user?.username }}
-            </span>
-            <button class="nav-link logout-btn" @click="handleLogout">退出登录</button>
+            <el-dropdown class="user-dropdown" trigger="click">
+              <span class="nav-user">
+                <el-avatar :size="28" :src="userAvatar" />
+                <span class="username">{{ user?.username }}</span>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="goToSettings">
+                    <el-icon><Setting /></el-icon>
+                    个人设置
+                  </el-dropdown-item>
+                  <el-dropdown-item divided @click="handleLogout">
+                    <el-icon><SwitchButton /></el-icon>
+                    退出登录
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
 
-          <router-link v-else to="/auth" class="nav-link auth-link" @click="closeNav">
+          <router-link
+            v-else
+            to="/auth"
+            class="nav-link auth-link"
+            @click="closeNav"
+          >
             去登录
           </router-link>
         </nav>
@@ -43,10 +65,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, ref, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { User } from "@element-plus/icons-vue";
+import { Setting, SwitchButton } from "@element-plus/icons-vue";
 import ThemeToggle from "./ThemeToggle.vue";
 import { authAPI } from "../services/api";
 
@@ -57,6 +79,19 @@ const isNavOpen = ref(false);
 const isScrolled = ref(false);
 const isLoggedIn = ref(authAPI.isLoggedIn());
 const user = ref(authAPI.getUser());
+
+const userAvatar = computed(() => {
+  if (user.value?.avatarUrl) {
+    if (user.value.avatarUrl.startsWith("http")) {
+      return user.value.avatarUrl;
+    }
+    return `http://localhost:3001${user.value.avatarUrl}`;
+  }
+  if (user.value?.username) {
+    return `https://ui-avatars.com/api/?name=${user.value.username}&background=409eff&color=fff&size=28`;
+  }
+  return "";
+});
 
 const checkLoginStatus = () => {
   isLoggedIn.value = authAPI.isLoggedIn();
@@ -112,6 +147,10 @@ const handleLogout = () => {
       router.push("/");
     })
     .catch(() => {});
+};
+
+const goToSettings = () => {
+  router.push("/settings");
 };
 
 onMounted(() => {
@@ -257,13 +296,25 @@ onUnmounted(() => {
 }
 
 .auth-link {
-  background: linear-gradient(135deg, rgba(64, 158, 255, 0.13), rgba(54, 207, 201, 0.13));
+  background: linear-gradient(
+    135deg,
+    rgba(64, 158, 255, 0.13),
+    rgba(54, 207, 201, 0.13)
+  );
 }
 
 .nav-user {
   gap: 0.45rem;
   color: #1f2d44;
   font-weight: 600;
+}
+
+.user-dropdown {
+  cursor: pointer;
+}
+
+.nav-user .username {
+  margin-left: 0.3rem;
 }
 
 .dark .nav-link,
