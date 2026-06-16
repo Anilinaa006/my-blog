@@ -212,6 +212,7 @@ watch(
   font-size: 0.96rem;
   display: -webkit-box;
   -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -297,6 +298,7 @@ watch(
   .post-excerpt {
     min-height: auto;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     font-size: 0.92rem;
   }
 }

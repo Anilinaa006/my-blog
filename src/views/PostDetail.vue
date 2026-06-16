@@ -558,7 +558,7 @@ const handleLikeComment = async (comment: any) => {
   }
 };
 
-const handleLikeReply = async (commentId: number, reply: any) => {
+const handleLikeReply = async (_commentId: number, reply: any) => {
   if (!isLoggedIn.value) {
     ElMessage.warning("请先登录");
     return;

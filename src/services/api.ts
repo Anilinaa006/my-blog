@@ -34,6 +34,7 @@ interface Comment {
   createdAt: string;
   updatedAt: string | null;
   likeCount: number;
+  liked?: boolean;
 }
 
 interface CommentReply {
@@ -49,6 +50,7 @@ interface CommentReply {
   createdAt: string;
   updatedAt: string | null;
   likeCount: number;
+  liked?: boolean;
 }
 
 interface LikeResponse {
