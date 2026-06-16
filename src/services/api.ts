@@ -1,4 +1,4 @@
-const API_BASE_URL = "/api";
+﻿const API_BASE_URL = "/api";
 interface AuthResponse {
   token: string;
   user: {
@@ -194,6 +194,26 @@ async function getUserInfo(): Promise<UserInfo> {
   }
 
   return payload as UserInfo;
+}
+
+interface AuthorInfo {
+  id: number;
+  username: string;
+  avatarUrl: string | null;
+  createdAt: string;
+}
+
+async function getAuthorInfo(): Promise<AuthorInfo | null> {
+  const response = await fetch(`${API_BASE_URL}/auth/author`);
+  const payload = await readResponseData<AuthorInfo>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "获取作者信息失败"),
+    );
+  }
+
+  return payload as AuthorInfo | null;
 }
 
 async function changePassword(
@@ -602,6 +622,7 @@ export const authAPI = {
   removeToken,
   isLoggedIn,
   getUserInfo,
+  getAuthorInfo,
   changePassword,
 };
 

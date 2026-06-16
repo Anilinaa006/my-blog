@@ -198,6 +198,21 @@ const isAuthor = async (userId: number): Promise<boolean> => {
 };
 
 router.get(
+  "/author",
+  asyncHandler(async (req, res) => {
+    const [rows] = await pool.query<any[]>(
+      "SELECT id, username, avatar_url as avatarUrl, created_at as createdAt FROM users WHERE role = 'author' LIMIT 1"
+    );
+
+    if (rows.length === 0) {
+      return res.json(null);
+    }
+
+    return res.json(rows[0]);
+  })
+);
+
+router.get(
   "/users",
   verifyToken,
   asyncHandler(async (req, res) => {

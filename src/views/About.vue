@@ -7,13 +7,32 @@
             <div class="avatar-frame">
               <el-avatar
                 :size="116"
-                src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20developer%20avatar&image_size=square"
-              />
+                :src="authorAvatarUrl"
+              >
+                <User />
+              </el-avatar>
             </div>
             <div class="quick-card">
               <span>Front-end Learner</span>
               <strong>Vue / React / TypeScript</strong>
             </div>
+            <el-upload
+              v-if="isAuthorLoggedIn"
+              class="avatar-uploader"
+              :action="uploadUrl"
+              :headers="uploadHeaders"
+              :show-file-list="false"
+              :on-success="handleUploadSuccess"
+              :on-error="handleUploadError"
+              :before-upload="beforeUpload"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              name="avatar"
+            >
+              <el-button type="primary" size="small" class="upload-button">
+                <el-icon><Upload /></el-icon>
+                更换头像
+              </el-button>
+            </el-upload>
           </div>
 
           <div class="hero-content">
@@ -92,12 +111,101 @@
   </el-container>
 </template>
 
-<script setup>
-import { Collection, User } from "@element-plus/icons-vue";
+<script setup lang="ts">
+import { computed, onMounted, ref } from "vue";
+import { ElMessage } from "element-plus";
+import { Collection, Upload, User } from "@element-plus/icons-vue";
+import { authAPI } from "../services/api";
+
+const authorInfo = ref<{
+  id: number;
+  username: string;
+  avatarUrl: string | null;
+  createdAt: string;
+} | null>(null);
+
+const isAuthorLoggedIn = computed(() => {
+  const user = authAPI.getUser();
+  return user?.role === "author";
+});
+
+const authorAvatarUrl = computed(() => {
+  if (!authorInfo.value?.avatarUrl) {
+    return "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20developer%20avatar&image_size=square";
+  }
+  return `http://localhost:3001${authorInfo.value.avatarUrl}`;
+});
+
+const uploadUrl = computed(() => "/api/auth/avatar");
+
+const uploadHeaders = computed(() => {
+  const token = authAPI.getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+});
+
+const beforeUpload = (file: File) => {
+  const isImage = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
+    file.type,
+  );
+  const isLt5M = file.size / 1024 / 1024 < 5;
+
+  if (!isImage) {
+    ElMessage.error("只支持 JPEG、PNG、GIF、WebP 格式的图片");
+    return false;
+  }
+
+  if (!isLt5M) {
+    ElMessage.error("图片大小不能超过 5MB");
+    return false;
+  }
+
+  return true;
+};
+
+const handleUploadSuccess = (response: { avatarUrl?: string }) => {
+  if (!response.avatarUrl) {
+    ElMessage.error("头像上传成功，但接口没有返回头像地址");
+    return;
+  }
+
+  if (authorInfo.value) {
+    authorInfo.value.avatarUrl = response.avatarUrl;
+  }
+
+  const storedUser = authAPI.getUser();
+  if (storedUser) {
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...storedUser,
+        avatarUrl: `http://localhost:3001${response.avatarUrl}`,
+      }),
+    );
+  }
+
+  ElMessage.success("头像上传成功");
+};
+
+const handleUploadError = () => {
+  ElMessage.error("头像上传失败，请重试");
+};
 
 const handleContact = () => {
   window.location.href = "mailto:2840668784@qq.com";
 };
+
+const loadAuthorInfo = async () => {
+  try {
+    const info = await authAPI.getAuthorInfo();
+    authorInfo.value = info;
+  } catch (error: any) {
+    console.error("获取作者信息失败:", error);
+  }
+};
+
+onMounted(() => {
+  loadAuthorInfo();
+});
 </script>
 
 <style scoped>
@@ -176,6 +284,26 @@ const handleContact = () => {
   display: block;
   font-size: 1.05rem;
   line-height: 1.5;
+}
+
+.avatar-uploader {
+  margin-top: auto;
+}
+
+.upload-button {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2f80ed;
+  border: none;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.upload-button:hover {
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(47, 128, 237, 0.25);
 }
 
 .hero-content {
