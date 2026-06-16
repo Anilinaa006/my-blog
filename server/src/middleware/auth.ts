@@ -46,3 +46,30 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     throw error;
   }
 };
+
+export const optionalVerifyToken = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      next();
+      return;
+    }
+
+    const token = authHeader.slice(7);
+    const decoded = jwt.verify(token, env.JWT_SECRET) as unknown as {
+      sub: number;
+      username: string;
+      role?: string;
+    };
+
+    req.user = {
+      id: decoded.sub,
+      username: decoded.username,
+      role: decoded.role
+    };
+    next();
+  } catch (error: any) {
+    next();
+  }
+};

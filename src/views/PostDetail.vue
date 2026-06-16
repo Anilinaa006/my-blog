@@ -48,30 +48,26 @@
           </h3>
 
           <div class="comment-form">
-            <el-card shadow="hover">
-              <template #header>
-                <div class="comment-form-header">
-                  <h4>发表评论</h4>
-                </div>
-              </template>
-              <div v-if="isLoggedIn">
+            <div class="comment-form-inner">
+              <div v-if="isLoggedIn" class="comment-input-wrapper">
                 <el-input
                   v-model="commentContent"
                   type="textarea"
-                  :rows="3"
-                  placeholder="请输入评论内容"
+                  :rows="1"
+                  placeholder="留下你的精彩评论吧"
                   maxlength="500"
                   show-word-limit
+                  class="comment-input"
                 />
-                <div class="comment-form-actions">
-                  <el-button
-                    type="primary"
-                    @click="handleSubmitComment"
-                    :loading="submittingComment"
-                  >
-                    发表评论
-                  </el-button>
-                </div>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="handleSubmitComment"
+                  :loading="submittingComment"
+                  class="comment-submit-btn"
+                >
+                  发送
+                </el-button>
               </div>
               <div v-else class="login-prompt">
                 <el-button type="primary" @click="handleLogin">
@@ -79,7 +75,7 @@
                   登录后发表评论
                 </el-button>
               </div>
-            </el-card>
+            </div>
           </div>
 
           <div class="comments-list" v-if="comments.length > 0">
@@ -112,10 +108,12 @@
               </div>
               <div class="comment-content">{{ comment.content }}</div>
               <div class="comment-interactions">
-                <div class="comment-like" @click="handleLikeComment(comment)">
-                  <el-icon :class="{ liked: likedComments.has(comment.id) }">
-                    <Star />
-                  </el-icon>
+                <div
+                  class="comment-like"
+                  :class="{ liked: likedComments.has(comment.id) }"
+                  @click="handleLikeComment(comment)"
+                >
+                  <el-icon><Star /></el-icon>
                   <span>{{ comment.likeCount || 0 }}</span>
                 </div>
                 <div class="comment-reply" @click="toggleReplyForm(comment.id)">
@@ -129,7 +127,11 @@
                   isLoggedIn && (comment.userId === currentUserId || isAuthor)
                 "
               >
-                <el-button size="small" @click="handleEditComment(comment)">
+                <el-button
+                  v-if="comment.userId === currentUserId"
+                  size="small"
+                  @click="handleEditComment(comment)"
+                >
                   <el-icon><Edit /></el-icon>
                   编辑
                 </el-button>
@@ -229,14 +231,75 @@
                       formatCommentDate(reply.createdAt)
                     }}</span>
                   </div>
-                  <div class="reply-content">{{ reply.content }}</div>
+                  <div class="reply-content" v-if="editingReplyId !== reply.id">
+                    {{ reply.content }}
+                  </div>
                   <div
-                    class="reply-action"
-                    v-if="isLoggedIn && reply.userId !== currentUserId"
-                    @click="toggleReplyForm(comment.id, reply)"
+                    class="edit-reply-form"
+                    v-if="editingReplyId === reply.id"
                   >
-                    <el-icon><Message /></el-icon>
-                    <span>回复</span>
+                    <el-input
+                      v-model="editReplyContent"
+                      type="textarea"
+                      :rows="2"
+                      placeholder="请输入回复内容"
+                      maxlength="500"
+                      show-word-limit
+                    />
+                    <div class="edit-reply-actions">
+                      <el-button size="small" @click="cancelEditReply">
+                        取消
+                      </el-button>
+                      <el-button
+                        size="small"
+                        type="primary"
+                        @click="submitEditReply(comment.id, reply.id)"
+                        :loading="editingReply"
+                      >
+                        保存
+                      </el-button>
+                    </div>
+                  </div>
+                  <div class="reply-interactions">
+                    <div
+                      class="reply-like"
+                      :class="{ liked: likedReplies.has(reply.id) }"
+                      @click="handleLikeReply(comment.id, reply)"
+                    >
+                      <el-icon><Star /></el-icon>
+                      <span>{{ reply.likeCount || 0 }}</span>
+                    </div>
+                    <div
+                      class="reply-reply"
+                      v-if="isLoggedIn && reply.userId !== currentUserId"
+                      @click="toggleReplyForm(comment.id, reply)"
+                    >
+                      <el-icon><Message /></el-icon>
+                      <span>回复</span>
+                    </div>
+                  </div>
+                  <div
+                    class="reply-actions"
+                    v-if="
+                      isLoggedIn && (reply.userId === currentUserId || isAuthor)
+                    "
+                  >
+                    <el-button
+                      v-if="reply.userId === currentUserId"
+                      size="small"
+                      @click="handleEditReply(reply)"
+                    >
+                      <el-icon><Edit /></el-icon>
+                      编辑
+                    </el-button>
+                    <el-button
+                      size="small"
+                      type="danger"
+                      @click="handleDeleteReply(comment.id, reply.id)"
+                    >
+                      <el-icon><Delete /></el-icon>
+                      删除
+                    </el-button>
                   </div>
                 </div>
               </div>
@@ -281,6 +344,10 @@ const editingCommentId = ref<number | null>(null);
 const editCommentContent = ref("");
 const editingComment = ref(false);
 const likedComments = ref<Set<number>>(new Set());
+const likedReplies = ref<Set<number>>(new Set());
+const editingReplyId = ref<number | null>(null);
+const editReplyContent = ref("");
+const editingReply = ref(false);
 const replyContentMap = reactive<Record<number, string>>({});
 const replyingCommentId = ref<number | null>(null);
 const submittingReplyId = ref<number | null>(null);
@@ -325,6 +392,9 @@ const loadComments = async () => {
     const postId = route.params.id as string;
     const data = await commentAPI.getComments(postId);
     comments.value = data;
+    likedComments.value = new Set(
+      data.filter((c: any) => c.liked).map((c: any) => c.id),
+    );
     for (const comment of data) {
       await loadCommentReplies(comment.id);
     }
@@ -338,6 +408,11 @@ const loadCommentReplies = async (commentId: number) => {
   try {
     const replies = await commentAPI.getCommentReplies(commentId);
     commentReplies.value.set(commentId, replies);
+    for (const reply of replies) {
+      if (reply.liked) {
+        likedReplies.value.add(reply.id);
+      }
+    }
   } catch (error: any) {
     console.error("加载回复失败:", error);
   }
@@ -480,6 +555,90 @@ const handleLikeComment = async (comment: any) => {
   } catch (error: any) {
     console.error("点赞失败:", error);
     ElMessage.error(error.message || "点赞失败");
+  }
+};
+
+const handleLikeReply = async (commentId: number, reply: any) => {
+  if (!isLoggedIn.value) {
+    ElMessage.warning("请先登录");
+    return;
+  }
+
+  try {
+    if (likedReplies.value.has(reply.id)) {
+      const result = await commentAPI.unlikeReply(reply.id);
+      reply.likeCount = result.likeCount;
+      likedReplies.value.delete(reply.id);
+    } else {
+      const result = await commentAPI.likeReply(reply.id);
+      reply.likeCount = result.likeCount;
+      likedReplies.value.add(reply.id);
+    }
+  } catch (error: any) {
+    console.error("回复点赞失败:", error);
+    ElMessage.error(error.message || "回复点赞失败");
+  }
+};
+
+const handleEditReply = (reply: any) => {
+  editingReplyId.value = reply.id;
+  editReplyContent.value = reply.content;
+};
+
+const cancelEditReply = () => {
+  editingReplyId.value = null;
+  editReplyContent.value = "";
+};
+
+const submitEditReply = async (commentId: number, replyId: number) => {
+  if (!editReplyContent.value.trim()) {
+    ElMessage.warning("请输入回复内容");
+    return;
+  }
+
+  try {
+    editingReply.value = true;
+    const updatedReply = await commentAPI.updateReply(
+      replyId,
+      editReplyContent.value,
+    );
+    const replies = commentReplies.value.get(commentId) || [];
+    const index = replies.findIndex((r) => r.id === replyId);
+    if (index !== -1) {
+      replies[index] = updatedReply;
+      commentReplies.value.set(commentId, [...replies]);
+    }
+    editingReplyId.value = null;
+    editReplyContent.value = "";
+    ElMessage.success("回复更新成功");
+  } catch (error: any) {
+    console.error("更新回复失败:", error);
+    ElMessage.error(error.message || "更新回复失败");
+  } finally {
+    editingReply.value = false;
+  }
+};
+
+const handleDeleteReply = async (commentId: number, replyId: number) => {
+  try {
+    await ElMessageBox.confirm("确定要删除这条回复吗？", "删除回复", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+
+    await commentAPI.deleteReply(replyId);
+    const replies = commentReplies.value.get(commentId) || [];
+    commentReplies.value.set(
+      commentId,
+      replies.filter((r) => r.id !== replyId),
+    );
+    ElMessage.success("回复删除成功");
+  } catch (error: any) {
+    if (error !== "cancel") {
+      console.error("删除回复失败:", error);
+      ElMessage.error(error.message || "删除回复失败");
+    }
   }
 };
 
@@ -1289,10 +1448,6 @@ onMounted(() => {
   color: #409eff;
 }
 
-.comment-like .liked {
-  color: #f56c6c;
-}
-
 .dark .comment-like,
 .dark .comment-reply {
   color: #909399;
@@ -1419,27 +1574,82 @@ onMounted(() => {
   color: #d6dbe1;
 }
 
-.reply-action {
+.reply-interactions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.reply-like,
+.reply-reply {
+  min-height: 30px;
+  padding: 0.32rem 0.68rem;
+  border-radius: 999px;
+  background: #f3f7fd;
+  color: #63718a;
   display: flex;
   align-items: center;
   gap: 0.3rem;
   cursor: pointer;
-  color: #666;
   font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.reply-like:hover,
+.reply-reply:hover {
+  background: #eaf4ff;
+  color: #2179d8;
+}
+
+.reply-like.liked {
+  background: #fef0f0 !important;
+  color: #f56c6c !important;
+}
+
+.reply-like.liked :deep(.el-icon) {
+  color: #f56c6c !important;
+}
+
+.reply-actions {
+  display: flex;
+  gap: 0.5rem;
   margin-top: 0.5rem;
-  transition: color 0.3s ease;
+  padding-top: 0.5rem;
+  border-top: 1px solid #eef2f8;
 }
 
-.reply-action:hover {
-  color: #409eff;
+.edit-reply-form {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: #f6f9ff;
 }
 
-.dark .reply-action {
-  color: #909399;
+.edit-reply-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 
-.dark .reply-action:hover {
+.dark .reply-like,
+.dark .reply-reply {
+  background: rgba(38, 45, 60, 0.92);
+  color: #8f9aae;
+}
+
+.dark .reply-like:hover,
+.dark .reply-reply:hover {
+  background: rgba(64, 158, 255, 0.15);
   color: #79bbff;
+}
+
+.dark .reply-actions {
+  border-top-color: #30363d;
+}
+
+.dark .edit-reply-form {
+  background: rgba(38, 45, 60, 0.92);
 }
 
 .no-comments {
@@ -1733,14 +1943,71 @@ onMounted(() => {
 }
 
 .comment-form {
-  margin-bottom: 1.2rem;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 0.3rem 0 0;
+  background: transparent;
+}
+
+.comment-form-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.comment-input-wrapper {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  padding: 6px 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(221, 230, 244, 0.6);
+}
+
+.comment-input {
+  flex: 1;
+}
+
+.comment-input :deep(.el-input__wrapper) {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: auto !important;
+  margin-bottom: 0 !important;
+  border: none !important;
+}
+
+.comment-input :deep(.el-textarea__inner) {
+  padding: 4px 0 !important;
+  line-height: 1.3 !important;
+  min-height: 28px !important;
+  height: auto !important;
+  margin-bottom: 0 !important;
+  color: #1e293b !important;
+}
+
+.comment-input :deep(.el-textarea__inner)::placeholder {
+  color: rgba(148, 163, 184, 0.7) !important;
+}
+
+.comment-submit-btn {
+  border-radius: 20px;
+  height: 34px;
+  padding: 0 1.2rem;
+  font-weight: 500;
 }
 
 .comment-form :deep(.el-card),
 .comment-card {
   border: 1px solid rgba(221, 230, 244, 0.95);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 16px 44px rgba(65, 87, 128, 0.1);
   backdrop-filter: blur(10px);
 }
@@ -1762,6 +2029,7 @@ onMounted(() => {
 
 .comments-list {
   gap: 1rem;
+  padding-bottom: 60px;
 }
 
 .comment-card {
@@ -1819,8 +2087,7 @@ onMounted(() => {
 }
 
 .comment-like,
-.comment-reply,
-.reply-action {
+.comment-reply {
   min-height: 30px;
   padding: 0.32rem 0.68rem;
   border-radius: 999px;
@@ -1829,10 +2096,18 @@ onMounted(() => {
 }
 
 .comment-like:hover,
-.comment-reply:hover,
-.reply-action:hover {
+.comment-reply:hover {
   background: #eaf4ff;
   color: #2179d8;
+}
+
+.comment-like.liked {
+  background: #fef0f0 !important;
+  color: #f56c6c !important;
+}
+
+.comment-like.liked :deep(.el-icon) {
+  color: #f56c6c !important;
 }
 
 .comment-actions,
@@ -1914,6 +2189,23 @@ onMounted(() => {
 .dark .post-body blockquote {
   border-color: rgba(72, 84, 108, 0.88);
   background-color: #202633;
+}
+
+.dark .comment-form {
+  background: rgba(15, 23, 42, 0.98);
+  border-top-color: rgba(148, 163, 184, 0.3);
+}
+
+.dark .comment-input :deep(.el-input__wrapper) {
+  background: rgba(148, 163, 184, 0.2) !important;
+}
+
+.dark .comment-input :deep(.el-textarea__inner) {
+  color: #f1f5f9 !important;
+}
+
+.dark .comment-input :deep(.el-textarea__inner)::placeholder {
+  color: rgba(148, 163, 184, 0.6) !important;
 }
 
 .dark .comment-form :deep(.el-card),

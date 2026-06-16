@@ -73,4 +73,19 @@ export const initSchema = async () => {
       INDEX idx_comment_replies_reply_to (reply_to_user_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+
+  // comment_reply_likes: 回复点赞
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS comment_reply_likes (
+      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+      reply_id BIGINT NOT NULL,
+      user_id BIGINT NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT fk_comment_reply_likes_reply FOREIGN KEY (reply_id) REFERENCES comment_replies(id) ON DELETE CASCADE,
+      CONSTRAINT fk_comment_reply_likes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      UNIQUE KEY uk_comment_reply_like (reply_id, user_id),
+      INDEX idx_comment_reply_likes_reply_id (reply_id),
+      INDEX idx_comment_reply_likes_user_id (user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
 };

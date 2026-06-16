@@ -41,11 +41,14 @@ interface CommentReply {
   commentId: number;
   userId: number;
   username: string;
+  avatarUrl?: string;
+  role?: string;
   replyToUserId: number | null;
   replyToUsername: string | null;
   content: string;
   createdAt: string;
   updatedAt: string | null;
+  likeCount: number;
 }
 
 interface LikeResponse {
@@ -223,7 +226,16 @@ async function changePassword(
 
 async function getComments(postId: string): Promise<Comment[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/comments?postId=${postId}`);
+    const token = getToken();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const response = await fetch(`${API_BASE_URL}/comments?postId=${postId}`, {
+      headers,
+    });
     const payload = await readResponseData<Comment[]>(response);
 
     if (!response.ok) {
@@ -402,7 +414,19 @@ async function unlikeComment(commentId: number): Promise<LikeResponse> {
 }
 
 async function getCommentReplies(commentId: number): Promise<CommentReply[]> {
-  const response = await fetch(`${API_BASE_URL}/comments/${commentId}/replies`);
+  const token = getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const response = await fetch(
+    `${API_BASE_URL}/comments/${commentId}/replies`,
+    {
+      headers,
+    },
+  );
   const payload = await readResponseData<CommentReply[]>(response);
 
   if (!response.ok) {
@@ -458,6 +482,115 @@ async function createReply(
   return payload as CommentReply;
 }
 
+async function likeReply(replyId: number): Promise<LikeResponse> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("请先登录");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/comments/replies/${replyId}/like`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  const payload = await readResponseData<LikeResponse>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "点赞失败"),
+    );
+  }
+
+  return payload as LikeResponse;
+}
+
+async function unlikeReply(replyId: number): Promise<LikeResponse> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("请先登录");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/comments/replies/${replyId}/like`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  const payload = await readResponseData<LikeResponse>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "取消点赞失败"),
+    );
+  }
+
+  return payload as LikeResponse;
+}
+
+async function updateReply(
+  replyId: number,
+  content: string,
+): Promise<CommentReply> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("请先登录");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/comments/replies/${replyId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ content }),
+  });
+
+  const payload = await readResponseData<CommentReply>(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(payload as ApiErrorPayload | null, "更新回复失败"),
+    );
+  }
+
+  return payload as CommentReply;
+}
+
+async function deleteReply(replyId: number): Promise<void> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("请先登录");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/comments/replies/${replyId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const payload = await readResponseData<ApiErrorPayload>(response);
+    throw new Error(getErrorMessage(payload, "删除回复失败"));
+  }
+}
+
 export const authAPI = {
   login,
   register,
@@ -479,4 +612,8 @@ export const commentAPI = {
   unlikeComment,
   getCommentReplies,
   createReply,
+  updateReply,
+  likeReply,
+  unlikeReply,
+  deleteReply,
 };
