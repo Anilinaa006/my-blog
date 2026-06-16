@@ -1,158 +1,418 @@
 <template>
   <el-container class="about-container">
     <el-main>
-      <div class="about">
-        <h2 class="page-title">关于我</h2>
-        <el-card class="about-card" shadow="hover">
-          <template #header>
-            <div class="about-header">
+      <section class="about-page">
+        <div class="profile-hero">
+          <div class="avatar-panel">
+            <div class="avatar-frame">
               <el-avatar
-                :size="80"
+                :size="116"
                 src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20developer%20avatar&image_size=square"
               />
-              <h2 class="about-title">个人介绍</h2>
             </div>
-          </template>
-          <div class="about-content">
-            <el-descriptions border :column="1">
-              <el-descriptions-item label="姓名">
-                <p>涂乾安</p>
-              </el-descriptions-item>
-              <el-descriptions-item label="个人介绍">
-                <p>我是东华理工大学软件工程专业的一名大三学生</p>
-                <p>我喜欢探索新的技术，并且对前端开发有浓厚的兴趣。</p>
-              </el-descriptions-item>
-              <el-descriptions-item label="博客说明">
-                <p>欢迎来到我的个人博客！</p>
-                <p>我是一名前端开发者，热爱技术，喜欢分享。</p>
-                <p>
-                  这个博客是使用ai辅助完成的,使用 Vue 3 和 Markdown
-                  搭建的，记录我的学习心得和技术分享。
-                </p>
-                <p>目前这个博客正在不断完善中，欢迎访问和反馈。</p>
-                <p>如果有任何问题或建议，欢迎联系我。</p>
-                <p>
-                  邮箱：<a href="mailto:2840668784@qq.com">2840668784@qq.com</a>
-                </p>
-              </el-descriptions-item>
-            </el-descriptions>
-            <div class="about-footer">
-              <el-button type="primary" round>联系我</el-button>
+            <div class="quick-card">
+              <span>Front-end Learner</span>
+              <strong>Vue / React / TypeScript</strong>
             </div>
           </div>
-        </el-card>
-      </div>
+
+          <div class="hero-content">
+            <span class="section-kicker">About Author</span>
+            <h1>你好，我是涂乾安</h1>
+            <p>
+              软件工程专业学生，正在系统学习前端开发。这个博客记录我的学习路线、项目实践和问题复盘，
+              也希望把每一次踩坑都变成下一次更清晰的理解。
+            </p>
+            <div class="hero-tags">
+              <span>前端开发</span>
+              <span>学习笔记</span>
+              <span>项目复盘</span>
+              <span>持续迭代</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <article class="story-card">
+            <div class="card-icon">
+              <el-icon><User /></el-icon>
+            </div>
+            <span class="section-kicker">Profile</span>
+            <h2>个人介绍</h2>
+            <p>
+              我来自东华理工大学软件工程专业，对页面交互、组件设计、状态管理和工程化工具链很感兴趣。
+            </p>
+            <p>
+              目前主要围绕 Vue、React、TypeScript、CSS、网络基础和前端工程化做学习整理，
+              也会把日常开发中遇到的问题写成更容易复盘的文章。
+            </p>
+          </article>
+
+          <article class="story-card accent-card">
+            <div class="card-icon">
+              <el-icon><Collection /></el-icon>
+            </div>
+            <span class="section-kicker">Blog</span>
+            <h2>为什么写博客</h2>
+            <p>
+              写博客是为了把“看懂了”变成“讲清楚”。我会用文章记录知识点、代码实践和排错过程，
+              让学习不只是收藏链接，而是留下可以反复回看的路径。
+            </p>
+            <a class="mail-link" href="mailto:2840668784@qq.com">
+              <span>邮箱联系</span>
+              <strong>2840668784@qq.com</strong>
+            </a>
+          </article>
+        </div>
+
+        <div class="focus-strip">
+          <div class="focus-item">
+            <strong>01</strong>
+            <span>夯实基础</span>
+          </div>
+          <div class="focus-item">
+            <strong>02</strong>
+            <span>实践项目</span>
+          </div>
+          <div class="focus-item">
+            <strong>03</strong>
+            <span>复盘问题</span>
+          </div>
+          <div class="focus-item">
+            <strong>04</strong>
+            <span>持续输出</span>
+          </div>
+        </div>
+
+        <div class="about-actions">
+          <el-button type="primary" round @click="handleContact">联系我</el-button>
+        </div>
+      </section>
     </el-main>
   </el-container>
 </template>
 
 <script setup>
-// 关于页组件
+import { Collection, User } from "@element-plus/icons-vue";
+
+const handleContact = () => {
+  window.location.href = "mailto:2840668784@qq.com";
+};
 </script>
 
 <style scoped>
 .about-container {
   min-height: calc(100vh - 60px);
+  background:
+    linear-gradient(135deg, rgba(250, 252, 255, 0.98), rgba(239, 246, 255, 0.96)),
+    radial-gradient(circle at 8% 16%, rgba(255, 138, 101, 0.2), transparent 30%),
+    radial-gradient(circle at 90% 8%, rgba(54, 207, 201, 0.18), transparent 28%);
 }
 
-.about {
-  max-width: 800px;
+.about-page {
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 3rem 1.25rem 4rem;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 2rem;
-  transition: color 0.3s ease;
+.profile-hero {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 1.4rem;
+  align-items: stretch;
 }
 
-.about-card {
-  transition: box-shadow 0.3s ease;
+.avatar-panel,
+.hero-content,
+.story-card,
+.focus-strip {
+  border: 1px solid rgba(221, 230, 244, 0.92);
+  box-shadow: 0 24px 70px rgba(69, 89, 126, 0.13);
+  backdrop-filter: blur(14px);
 }
 
-.about-card:hover {
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-}
-
-.about-header {
+.avatar-panel {
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 320px;
+  padding: 1.4rem;
+  border-radius: 28px;
+  background:
+    linear-gradient(160deg, #ff8a65 0%, #ffb36d 48%, #36cfc9 100%);
+  color: #fff;
+}
+
+.avatar-frame {
+  display: grid;
+  place-items: center;
+  width: 150px;
+  height: 150px;
+  border-radius: 34px;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+}
+
+.avatar-frame :deep(.el-avatar) {
+  border: 5px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 34px rgba(117, 73, 52, 0.24);
+}
+
+.quick-card {
+  padding: 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.quick-card span {
+  display: block;
+  margin-bottom: 0.35rem;
+  opacity: 0.86;
+  font-size: 0.86rem;
+}
+
+.quick-card strong {
+  display: block;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.4rem;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.section-kicker {
+  color: #2e7bd8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero-content h1 {
+  margin: 0.7rem 0 1rem;
+  color: #162136;
+  font-size: clamp(2.35rem, 5vw, 4rem);
+  font-weight: 850;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.hero-content p,
+.story-card p {
+  margin: 0;
+  color: #5d6b84;
+  line-height: 1.9;
+}
+
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.45rem;
+}
+
+.hero-tags span {
+  padding: 0.5rem 0.82rem;
+  border: 1px solid #dbe7f6;
+  border-radius: 999px;
+  background: #f6f9ff;
+  color: #48617f;
+  font-size: 0.9rem;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+}
+
+.story-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1.6rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.story-card::after {
+  content: "";
+  position: absolute;
+  right: -54px;
+  bottom: -54px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(64, 158, 255, 0.1);
+}
+
+.accent-card::after {
+  background: rgba(54, 207, 201, 0.13);
+}
+
+.card-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 1rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #409eff, #36cfc9);
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.story-card h2 {
+  margin: 0.55rem 0 0.9rem;
+  color: #1d2a3f;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.story-card p + p {
+  margin-top: 0.85rem;
+}
+
+.mail-link {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  margin-top: 1.15rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: #f3f8ff;
+  color: #65738b;
+  text-decoration: none;
 }
 
-.about-title {
-  font-size: 1.5rem;
-  margin: 0;
-  color: #333;
-  transition: color 0.3s ease;
+.mail-link strong {
+  color: #2179d8;
 }
 
-.about-content {
-  line-height: 1.8;
-  color: #333;
-  transition: color 0.3s ease;
+.focus-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin-top: 1.2rem;
+  border-radius: 22px;
+  background: rgba(221, 230, 244, 0.92);
 }
 
-.about-content p {
-  margin-bottom: 1rem;
+.focus-item {
+  padding: 1.15rem;
+  background: rgba(255, 255, 255, 0.9);
 }
 
-.about-footer {
-  margin-top: 2rem;
+.focus-item strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #36a3d6;
+  font-size: 1.35rem;
+}
+
+.focus-item span {
+  color: #4f5e75;
+  font-weight: 700;
+}
+
+.about-actions {
+  margin-top: 1.5rem;
   text-align: center;
 }
 
-/* 暗黑模式 */
-.dark .page-title {
-  color: #e0e0e0;
+.about-actions :deep(.el-button) {
+  min-width: 128px;
+  height: 42px;
+  font-weight: 800;
+  box-shadow: 0 14px 30px rgba(64, 158, 255, 0.28);
 }
 
-.dark .about-title {
-  color: #e0e0e0;
+.dark .about-container {
+  background:
+    linear-gradient(135deg, #121722 0%, #151a24 52%, #10141c 100%),
+    radial-gradient(circle at 8% 16%, rgba(255, 138, 101, 0.12), transparent 32%),
+    radial-gradient(circle at 90% 8%, rgba(54, 207, 201, 0.1), transparent 30%);
 }
 
-.dark .about-content {
-  color: #e0e0e0;
+.dark .hero-content,
+.dark .story-card,
+.dark .focus-strip {
+  border-color: rgba(70, 82, 104, 0.82);
+  background: rgba(26, 32, 43, 0.88);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
 }
 
-.dark .about-content p {
-  color: #e0e0e0;
+.dark .hero-content h1,
+.dark .story-card h2 {
+  color: #eef3fb;
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .about {
-    padding: 1.5rem 1rem;
+.dark .hero-content p,
+.dark .story-card p,
+.dark .mail-link,
+.dark .focus-item span {
+  color: #aab5c7;
+}
+
+.dark .section-kicker {
+  color: #79bbff;
+}
+
+.dark .hero-tags span,
+.dark .mail-link,
+.dark .focus-item {
+  border-color: rgba(72, 84, 108, 0.86);
+  background: rgba(38, 45, 60, 0.92);
+}
+
+.dark .hero-tags span {
+  color: #c4cedd;
+}
+
+.dark .mail-link strong {
+  color: #79bbff;
+}
+
+@media (max-width: 860px) {
+  .profile-hero,
+  .content-grid,
+  .focus-strip {
+    grid-template-columns: 1fr;
   }
 
-  .page-title {
-    font-size: 1.3rem;
-    margin-bottom: 1.5rem;
+  .avatar-panel {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-page {
+    padding: 2rem 0.9rem 3rem;
   }
 
-  .about-header {
-    flex-direction: column;
+  .hero-content,
+  .story-card {
+    padding: 1.35rem;
+    border-radius: 22px;
+  }
+
+  .hero-content h1 {
+    font-size: 2.1rem;
+  }
+
+  .mail-link {
     align-items: flex-start;
-    gap: 0.8rem;
-  }
-
-  .about-title {
-    font-size: 1.3rem;
-  }
-
-  .about-content {
-    font-size: 0.95rem;
-  }
-
-  .about-content p {
-    margin-bottom: 0.8rem;
-  }
-
-  .about-footer {
-    margin-top: 1.5rem;
+    flex-direction: column;
   }
 }
 </style>

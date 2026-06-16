@@ -1,53 +1,91 @@
-﻿<template>
+<template>
   <el-container class="blog-intro-container">
     <el-main>
-      <div class="blog-intro">
-        <h2 class="page-title">博客介绍</h2>
-        <el-card class="blog-intro-card" shadow="hover">
-          <template #header>
-            <div class="blog-intro-header">
-              <h2 class="blog-intro-title">关于本博客</h2>
-            </div>
-          </template>
-          <div class="blog-intro-content">
-            <el-descriptions border :column="1">
-              <el-descriptions-item label="博客功能">
-                <ul class="feature-list">
-                  <li>支持 Markdown 格式文章</li>
-                  <li>支持深色 / 浅色模式切换</li>
-                  <li>响应式设计，对移动端友好</li>
-                  <li>文章分类筛选</li>
-                  <li>按发布时间排序</li>
-                  <li>阅读时间估算</li>
-                  <li>简洁美观的阅读界面</li>
-                  <li>支持文章评论</li>
-                  <li>包含登录和注册功能</li>
-                </ul>
-              </el-descriptions-item>
-              <el-descriptions-item label="技术栈">
-                <ul class="tech-stack">
-                  <li>Vue 3 + Composition API + TypeScript</li>
-                  <li>Vue Router</li>
-                  <li>Element Plus 组件库</li>
-                  <li>Marked 用于 Markdown 解析</li>
-                  <li>后端：Node.js + Express + MySQL</li>
-                  <li>Vite 构建工具</li>
-                </ul>
-              </el-descriptions-item>
-              <el-descriptions-item label="未来计划">
-                <ul class="future-plans">
-                  <li>添加搜索功能</li>
-                  <li>增加文章统计</li>
-                  <li>完善评论体验</li>
-                  <li>支持标签系统</li>
-                  <li>继续优化移动端体验</li>
-                  <li>持续更新更多内容</li>
-                </ul>
-              </el-descriptions-item>
-            </el-descriptions>
+      <section class="intro-page">
+        <div class="intro-hero">
+          <div class="hero-copy">
+            <span class="section-kicker">Blog Intro</span>
+            <h1>一个持续更新的前端学习库</h1>
+            <p>
+              这里记录我学习前端时整理出的文章、问题复盘和项目实践。它不是一次性完成的展示页，
+              而是一个会随着学习进度不断更新的知识空间。
+            </p>
           </div>
-        </el-card>
-      </div>
+          <div class="hero-metrics">
+            <div>
+              <strong>Markdown</strong>
+              <span>文章沉淀</span>
+            </div>
+            <div>
+              <strong>Comment</strong>
+              <span>交流反馈</span>
+            </div>
+            <div>
+              <strong>Dark Mode</strong>
+              <span>舒适阅读</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-layout">
+          <article class="feature-card large-card">
+            <span class="section-kicker">Features</span>
+            <h2>博客现在支持什么</h2>
+            <div class="feature-list">
+              <div class="feature-item">
+                <span>01</span>
+                <p>Markdown 文章编写、解析和分类展示，适合沉淀系统性学习笔记。</p>
+              </div>
+              <div class="feature-item">
+                <span>02</span>
+                <p>文章筛选、发布时间排序、阅读时间估算，让内容更容易查找和浏览。</p>
+              </div>
+              <div class="feature-item">
+                <span>03</span>
+                <p>登录、注册、评论、回复和点赞，让文章不只是静态记录，也可以被讨论。</p>
+              </div>
+              <div class="feature-item">
+                <span>04</span>
+                <p>亮色 / 暗色模式和响应式布局，兼顾桌面端与移动端的阅读体验。</p>
+              </div>
+            </div>
+          </article>
+
+          <aside class="stack-card">
+            <span class="section-kicker">Stack</span>
+            <h2>技术栈</h2>
+            <div class="stack-list">
+              <span>Vue 3</span>
+              <span>TypeScript</span>
+              <span>Vue Router</span>
+              <span>Element Plus</span>
+              <span>Marked</span>
+              <span>Vite</span>
+              <span>Express</span>
+              <span>MySQL</span>
+            </div>
+          </aside>
+        </div>
+
+        <div class="roadmap-card">
+          <span class="section-kicker">Roadmap</span>
+          <h2>接下来会继续优化</h2>
+          <div class="roadmap-list">
+            <div class="roadmap-item">
+              <strong>搜索与标签</strong>
+              <span>让文章可以按关键词、分类和标签更快定位。</span>
+            </div>
+            <div class="roadmap-item">
+              <strong>阅读体验</strong>
+              <span>补充文章目录、锚点跳转和相关文章推荐。</span>
+            </div>
+            <div class="roadmap-item">
+              <strong>互动体验</strong>
+              <span>继续打磨评论、回复、点赞和用户状态展示。</span>
+            </div>
+          </div>
+        </div>
+      </section>
     </el-main>
   </el-container>
 </template>
@@ -58,117 +96,301 @@
 <style scoped>
 .blog-intro-container {
   min-height: calc(100vh - 60px);
+  background:
+    linear-gradient(135deg, rgba(250, 252, 255, 0.98), rgba(239, 246, 255, 0.96)),
+    radial-gradient(circle at 16% 8%, rgba(64, 158, 255, 0.16), transparent 30%),
+    radial-gradient(circle at 86% 14%, rgba(255, 138, 101, 0.14), transparent 28%);
 }
 
-.blog-intro {
-  max-width: 800px;
+.intro-page {
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 3rem 1.25rem 4rem;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 2rem;
-  transition: color 0.3s ease;
+.intro-hero,
+.feature-card,
+.stack-card,
+.roadmap-card {
+  border: 1px solid rgba(221, 230, 244, 0.92);
+  box-shadow: 0 24px 70px rgba(69, 89, 126, 0.13);
+  backdrop-filter: blur(14px);
 }
 
-.blog-intro-card {
-  transition: box-shadow 0.3s ease;
+.intro-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 1.2rem;
+  align-items: stretch;
+  padding: 1.2rem;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.7);
 }
 
-.blog-intro-card:hover {
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+.hero-copy {
+  padding: 2rem;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(243, 248, 255, 0.9)),
+    radial-gradient(circle at top right, rgba(54, 207, 201, 0.16), transparent 32%);
 }
 
-.blog-intro-header {
+.section-kicker {
+  color: #2e7bd8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero-copy h1 {
+  max-width: 780px;
+  margin: 0.7rem 0 1rem;
+  color: #162136;
+  font-size: clamp(2.3rem, 5vw, 4rem);
+  font-weight: 850;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.hero-copy p {
+  max-width: 800px;
+  margin: 0;
+  color: #5d6b84;
+  line-height: 1.9;
+}
+
+.hero-metrics {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.hero-metrics div {
   display: flex;
-  align-items: center;
-}
-
-.blog-intro-title {
-  font-size: 1.5rem;
-  margin: 0;
-  color: #333;
-  transition: color 0.3s ease;
-}
-
-.blog-intro-content {
-  line-height: 1.8;
-  color: #333;
-  transition: color 0.3s ease;
-}
-
-.feature-list,
-.tech-stack,
-.future-plans {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.feature-list li,
-.tech-stack li,
-.future-plans li {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.feature-list li:last-child,
-.tech-stack li:last-child,
-.future-plans li:last-child {
-  border-bottom: none;
-}
-
-.blog-intro-content p {
-  margin-bottom: 1rem;
-}
-
-.blog-intro-content pre {
-  background: #f8f9fa;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 96px;
   padding: 1rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  margin: 1rem 0;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #409eff, #36cfc9);
+  color: #fff;
 }
 
-.blog-intro-content code {
-  background: #f1f3f5;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.9em;
+.hero-metrics div:nth-child(2) {
+  background: linear-gradient(135deg, #ff8a65, #ffbc6b);
 }
 
-.dark .page-title {
-  color: #e0e0e0;
+.hero-metrics div:nth-child(3) {
+  background: linear-gradient(135deg, #6c63ff, #409eff);
 }
 
-.dark .blog-intro-title {
-  color: #e0e0e0;
+.hero-metrics strong {
+  margin-bottom: 0.35rem;
+  font-size: 1.25rem;
 }
 
-.dark .blog-intro-content {
-  color: #d0d7e2;
+.hero-metrics span {
+  opacity: 0.86;
 }
 
-.dark .blog-intro-content pre {
-  background: #2d3748;
+.feature-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+  gap: 1.2rem;
+  margin-top: 1.2rem;
 }
 
-.dark .blog-intro-content code {
-  background: #4a5568;
-  color: #e2e8f0;
+.feature-card,
+.stack-card,
+.roadmap-card {
+  padding: 1.6rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
 }
 
-@media (max-width: 768px) {
-  .blog-intro {
-    padding: 1.5rem 1rem;
+.feature-card h2,
+.stack-card h2,
+.roadmap-card h2 {
+  margin: 0.55rem 0 1rem;
+  color: #1d2a3f;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.feature-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.feature-item {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid #e6eef9;
+  border-radius: 18px;
+  background: #f7faff;
+}
+
+.feature-item span {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #fff;
+  color: #2181df;
+  font-weight: 850;
+  box-shadow: 0 10px 24px rgba(64, 158, 255, 0.12);
+}
+
+.feature-item p {
+  margin: 0;
+  color: #53627a;
+  line-height: 1.75;
+}
+
+.stack-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.stack-list span {
+  padding: 0.62rem 0.8rem;
+  border: 1px solid #dbe7f6;
+  border-radius: 999px;
+  background: #f6f9ff;
+  color: #48617f;
+  font-weight: 700;
+}
+
+.roadmap-card {
+  margin-top: 1.2rem;
+}
+
+.roadmap-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.roadmap-item {
+  padding: 1rem;
+  border: 1px solid #e6eef9;
+  border-radius: 18px;
+  background: #f7faff;
+}
+
+.roadmap-item strong {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #21314a;
+}
+
+.roadmap-item span {
+  color: #5f6d84;
+  line-height: 1.7;
+}
+
+.dark .blog-intro-container {
+  background:
+    linear-gradient(135deg, #121722 0%, #151a24 52%, #10141c 100%),
+    radial-gradient(circle at 16% 8%, rgba(64, 158, 255, 0.11), transparent 32%),
+    radial-gradient(circle at 86% 14%, rgba(255, 138, 101, 0.1), transparent 30%);
+}
+
+.dark .intro-hero,
+.dark .feature-card,
+.dark .stack-card,
+.dark .roadmap-card {
+  border-color: rgba(70, 82, 104, 0.82);
+  background: rgba(26, 32, 43, 0.88);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+}
+
+.dark .hero-copy {
+  background:
+    linear-gradient(135deg, rgba(35, 42, 56, 0.95), rgba(25, 31, 43, 0.9)),
+    radial-gradient(circle at top right, rgba(54, 207, 201, 0.1), transparent 34%);
+}
+
+.dark .hero-copy h1,
+.dark .feature-card h2,
+.dark .stack-card h2,
+.dark .roadmap-card h2,
+.dark .roadmap-item strong {
+  color: #eef3fb;
+}
+
+.dark .hero-copy p,
+.dark .feature-item p,
+.dark .roadmap-item span {
+  color: #aab5c7;
+}
+
+.dark .section-kicker {
+  color: #79bbff;
+}
+
+.dark .feature-item,
+.dark .roadmap-item,
+.dark .stack-list span {
+  border-color: rgba(72, 84, 108, 0.86);
+  background: rgba(38, 45, 60, 0.92);
+}
+
+.dark .feature-item span {
+  background: rgba(22, 27, 37, 0.95);
+  color: #79bbff;
+}
+
+.dark .stack-list span {
+  color: #c4cedd;
+}
+
+@media (max-width: 900px) {
+  .intro-hero,
+  .feature-layout,
+  .roadmap-list {
+    grid-template-columns: 1fr;
   }
 
-  .page-title,
-  .blog-intro-title {
-    font-size: 1.3rem;
+  .hero-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .intro-page {
+    padding: 2rem 0.9rem 3rem;
+  }
+
+  .intro-hero {
+    padding: 0.8rem;
+    border-radius: 24px;
+  }
+
+  .hero-copy,
+  .feature-card,
+  .stack-card,
+  .roadmap-card {
+    padding: 1.35rem;
+    border-radius: 22px;
+  }
+
+  .hero-copy h1 {
+    font-size: 2.05rem;
+  }
+
+  .hero-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-item {
+    grid-template-columns: 1fr;
   }
 }
 </style>
