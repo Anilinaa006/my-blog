@@ -19,6 +19,7 @@ router.get(
         c.post_id as postId, 
         c.user_id as userId, 
         u.username, 
+        u.avatar_url as avatarUrl,
         c.content, 
         c.created_at as createdAt, 
         c.updated_at as updatedAt,
@@ -65,6 +66,7 @@ router.post(
         c.post_id as postId, 
         c.user_id as userId, 
         u.username, 
+        u.avatar_url as avatarUrl,
         c.content, 
         c.created_at as createdAt, 
         c.updated_at as updatedAt
@@ -113,6 +115,7 @@ router.put(
         c.post_id as postId, 
         c.user_id as userId, 
         u.username, 
+        u.avatar_url as avatarUrl,
         c.content, 
         c.created_at as createdAt, 
         c.updated_at as updatedAt

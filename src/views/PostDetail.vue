@@ -91,10 +91,9 @@
             >
               <div class="comment-header">
                 <div class="comment-user">
-                  <el-avatar
-                    :size="32"
-                    :src="`https://ui-avatars.com/api/?name=${comment.username}&background=409eff&color=fff`"
-                  />
+                  <el-avatar :size="32" :src="getCommentAvatar(comment)">
+                    {{ getDefaultAvatarText(comment.username) }}
+                  </el-avatar>
                   <span class="username">{{ comment.username }}</span>
                 </div>
                 <div class="comment-time">
@@ -199,10 +198,9 @@
                   class="reply-item"
                 >
                   <div class="reply-header">
-                    <el-avatar
-                      :size="24"
-                      :src="`https://ui-avatars.com/api/?name=${reply.username}&background=409eff&color=fff`"
-                    />
+                    <el-avatar :size="24" :src="getCommentAvatar(reply)">
+                      {{ getDefaultAvatarText(reply.username) }}
+                    </el-avatar>
                     <span class="reply-username">{{ reply.username }}</span>
                     <span v-if="reply.replyToUsername" class="reply-to">
                       回复 {{ reply.replyToUsername }}
@@ -422,8 +420,14 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const formatCommentDate = (dateString: string) => {
+const formatCommentDate = (dateString: string | undefined) => {
+  if (!dateString) {
+    return "-";
+  }
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return "-";
+  }
   return date.toLocaleString("zh-CN", {
     year: "numeric",
     month: "2-digit",
@@ -507,6 +511,24 @@ const handleSubmitReply = async (commentId: number) => {
 
 const handleBack = () => {
   router.push("/");
+};
+
+const getCommentAvatar = (comment: any) => {
+  if (comment.avatarUrl) {
+    const url = comment.avatarUrl;
+    if (url.startsWith("http")) {
+      return url;
+    }
+    return `http://localhost:3001${url}`;
+  }
+  return "";
+};
+
+const getDefaultAvatarText = (username: string) => {
+  if (username) {
+    return username.substring(0, 2).toUpperCase();
+  }
+  return "";
 };
 
 onMounted(() => {

@@ -21,6 +21,7 @@ router.get("/", async (req: Request, res: Response) => {
         c.post_id as postId, 
         c.user_id as userId, 
         u.username, 
+        u.avatar_url as avatarUrl,
         c.content, 
         c.created_at as createdAt, 
         c.updated_at as updatedAt,
@@ -67,7 +68,20 @@ router.post("/", verifyToken, async (req: Request, res: Response) => {
     );
 
     const [newComment] = await pool.query<any[]>(
-      "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id WHERE c.id = ?",
+      `
+      SELECT 
+        c.id, 
+        c.post_id as postId, 
+        c.user_id as userId, 
+        u.username, 
+        u.avatar_url as avatarUrl,
+        c.content, 
+        c.created_at as createdAt, 
+        c.updated_at as updatedAt
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.id = ?
+      `,
       [result.insertId]
     );
 
@@ -104,12 +118,25 @@ router.put("/:id", verifyToken, async (req: Request, res: Response) => {
     }
 
     await pool.query(
-      "UPDATE comments SET content = ? WHERE id = ?",
+      "UPDATE comments SET content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
       [content, id]
     );
 
     const [updatedComment] = await pool.query<any[]>(
-      "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id WHERE c.id = ?",
+      `
+      SELECT 
+        c.id, 
+        c.post_id as postId, 
+        c.user_id as userId, 
+        u.username, 
+        u.avatar_url as avatarUrl,
+        c.content, 
+        c.created_at as createdAt, 
+        c.updated_at as updatedAt
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.id = ?
+      `,
       [id]
     );
 
@@ -199,8 +226,10 @@ router.get("/:id/replies", async (req: Request, res: Response) => {
         cr.comment_id as commentId, 
         cr.user_id as userId, 
         u.username, 
+        u.avatar_url as avatarUrl,
         cr.reply_to_user_id as replyToUserId, 
         ru.username as replyToUsername,
+        ru.avatar_url as replyToAvatarUrl,
         cr.content, 
         cr.created_at as createdAt, 
         cr.updated_at as updatedAt
@@ -244,8 +273,10 @@ router.post("/:id/replies", verifyToken, async (req: Request, res: Response) => 
         cr.comment_id as commentId, 
         cr.user_id as userId, 
         u.username, 
+        u.avatar_url as avatarUrl,
         cr.reply_to_user_id as replyToUserId, 
         ru.username as replyToUsername,
+        ru.avatar_url as replyToAvatarUrl,
         cr.content, 
         cr.created_at as createdAt, 
         cr.updated_at as updatedAt
