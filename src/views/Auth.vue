@@ -1,20 +1,34 @@
-﻿<template>
+<template>
   <el-container class="auth-container">
     <el-main class="auth-main">
       <section class="auth-shell">
         <div class="auth-showcase">
           <span class="auth-kicker">Frontend Diary</span>
-          <h1 class="showcase-title">登录后即可发布评论</h1>
+          <h1 class="showcase-title">
+            {{ isAuthor ? "作者管理后台" : "登录后即可发布评论" }}
+          </h1>
           <p class="showcase-description">
-            登录后可以参与评论、管理自己的内容轨迹，也能让这份前端学习手记更有互动感。
+            {{
+              isAuthor
+                ? "作者登录后可以管理文章、评论和博客内容。"
+                : "登录后可以参与评论、管理自己的内容轨迹，也能让这份前端学习手记更有互动感。"
+            }}
           </p>
 
           <div class="showcase-points">
-            <div class="point-card">
+            <div class="point-card" v-if="isAuthor">
+              <strong>文章管理</strong>
+              <span>发布、编辑、删除博客文章。</span>
+            </div>
+            <div class="point-card" v-if="isAuthor">
+              <strong>评论管理</strong>
+              <span>管理用户评论，维护社区秩序。</span>
+            </div>
+            <div class="point-card" v-if="!isAuthor">
               <strong>继续阅读</strong>
               <span>保留你的浏览节奏，快速回到上次看到的内容。</span>
             </div>
-            <div class="point-card">
+            <div class="point-card" v-if="!isAuthor">
               <strong>参与评论</strong>
               <span>对文章补充理解、记录问题，也能留下自己的思考。</span>
             </div>
@@ -29,19 +43,49 @@
           <div class="auth-card">
             <div class="auth-header">
               <div>
-                <p class="auth-eyebrow">{{ isLogin ? "Welcome Back" : "Create Account" }}</p>
-                <h2 class="auth-title">{{ isLogin ? "登录" : "注册" }}</h2>
+                <p class="auth-eyebrow">
+                  {{ isLogin ? "Welcome Back" : "Create Account" }}
+                </p>
+                <h2 class="auth-title">
+                  {{
+                    isAuthor
+                      ? isLogin
+                        ? "作者登录"
+                        : "作者注册"
+                      : isLogin
+                        ? "登录"
+                        : "注册"
+                  }}
+                </h2>
                 <p class="auth-subtitle">
                   {{
-                    isLogin
-                      ? "输入账号信息，继续你的博客阅读与互动。"
-                      : "创建一个账号，开始发表评论和记录你的前端学习。"
+                    isAuthor
+                      ? isLogin
+                        ? "作者登录后可以管理博客内容。"
+                        : "注册作者账号，开始发布文章。"
+                      : isLogin
+                        ? "输入账号信息，继续你的博客阅读与互动。"
+                        : "创建一个账号，开始发表评论和记录你的前端学习。"
                   }}
                 </p>
               </div>
-              <el-button type="primary" link class="toggle-button" @click="toggleMode">
+              <el-button
+                type="primary"
+                link
+                class="toggle-button"
+                @click="toggleMode"
+              >
                 {{ isLogin ? "没有账号？去注册" : "已有账号？去登录" }}
               </el-button>
+            </div>
+
+            <div class="role-switch">
+              <span class="role-label">登录类型</span>
+              <el-switch
+                v-model="isAuthor"
+                active-text="作者"
+                inactive-text="用户"
+              />
             </div>
 
             <el-form
@@ -53,7 +97,10 @@
               class="auth-form"
             >
               <el-form-item label="用户名" prop="username">
-                <el-input v-model="loginForm.username" placeholder="请输入用户名" />
+                <el-input
+                  v-model="loginForm.username"
+                  placeholder="请输入用户名"
+                />
               </el-form-item>
               <el-form-item label="密码" prop="password">
                 <el-input
@@ -131,6 +178,7 @@ import { authAPI } from "../services/api";
 
 const router = useRouter();
 const isLogin = ref(true);
+const isAuthor = ref(false);
 const loading = ref(false);
 const loginFormRef = ref();
 const registerFormRef = ref();
@@ -171,7 +219,11 @@ const registerRules = {
   confirmPassword: [
     { required: true, message: "请确认密码", trigger: "blur" },
     {
-      validator: (_rule: unknown, value: string, callback: (error?: Error) => void) => {
+      validator: (
+        _rule: unknown,
+        value: string,
+        callback: (error?: Error) => void,
+      ) => {
         if (value !== registerForm.password) {
           callback(new Error("两次输入的密码不一致"));
         } else {
@@ -199,6 +251,17 @@ const handleLogin = async () => {
       password: loginForm.password,
     });
 
+    const expectedRole = isAuthor.value ? "author" : "user";
+    if (response.user.role !== expectedRole) {
+      loading.value = false;
+      ElMessage.error(
+        isAuthor.value
+          ? "该账号不是作者账号，请切换到用户登录"
+          : "该账号是作者账号，请切换到作者登录",
+      );
+      return;
+    }
+
     authAPI.saveToken(response.token, response.user);
 
     loading.value = false;
@@ -221,6 +284,7 @@ const handleRegister = async () => {
     await authAPI.register({
       username: registerForm.username,
       password: registerForm.password,
+      role: isAuthor.value ? "author" : "user",
     });
 
     loading.value = false;
@@ -260,9 +324,21 @@ const handleRegister = async () => {
   padding: 3rem;
   border-radius: 30px;
   background:
-    radial-gradient(circle at top right, rgba(64, 158, 255, 0.2), transparent 30%),
-    radial-gradient(circle at left bottom, rgba(54, 207, 201, 0.14), transparent 26%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.86), rgba(242, 247, 255, 0.78));
+    radial-gradient(
+      circle at top right,
+      rgba(64, 158, 255, 0.2),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at left bottom,
+      rgba(54, 207, 201, 0.14),
+      transparent 26%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.86),
+      rgba(242, 247, 255, 0.78)
+    );
   border: 1px solid rgba(255, 255, 255, 0.78);
   box-shadow: 0 24px 55px rgba(73, 95, 136, 0.14);
 }
@@ -274,7 +350,11 @@ const handleRegister = async () => {
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(64, 158, 255, 0.22), transparent 68%);
+  background: radial-gradient(
+    circle,
+    rgba(64, 158, 255, 0.22),
+    transparent 68%
+  );
 }
 
 .auth-kicker,
@@ -392,6 +472,24 @@ const handleRegister = async () => {
   white-space: nowrap;
 }
 
+.role-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 14px;
+  background: rgba(64, 158, 255, 0.08);
+  border: 1px solid rgba(64, 158, 255, 0.2);
+}
+
+.role-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #31415d;
+}
+
 .auth-form :deep(.el-form-item) {
   margin-bottom: 1.25rem;
 }
@@ -418,8 +516,16 @@ const handleRegister = async () => {
 
 .dark .auth-showcase {
   background:
-    radial-gradient(circle at top right, rgba(64, 158, 255, 0.18), transparent 30%),
-    radial-gradient(circle at left bottom, rgba(54, 207, 201, 0.1), transparent 25%),
+    radial-gradient(
+      circle at top right,
+      rgba(64, 158, 255, 0.18),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at left bottom,
+      rgba(54, 207, 201, 0.1),
+      transparent 25%
+    ),
     linear-gradient(145deg, rgba(23, 30, 43, 0.95), rgba(18, 23, 33, 0.92));
   border-color: rgba(71, 84, 104, 0.88);
   box-shadow: 0 24px 55px rgba(0, 0, 0, 0.28);

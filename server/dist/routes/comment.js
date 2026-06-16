@@ -18,6 +18,7 @@ router.get("/", async (req, res) => {
         c.post_id as postId, 
         c.user_id as userId, 
         u.username, 
+        u.avatar_url as avatarUrl,
         c.content, 
         c.created_at as createdAt, 
         c.updated_at as updatedAt,
@@ -52,7 +53,20 @@ router.post("/", auth_1.verifyToken, async (req, res) => {
             throw new errors_1.ApiError(400, "缺少文章ID或评论内容");
         }
         const [result] = await db_1.pool.query("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)", [postId, userId, content]);
-        const [newComment] = await db_1.pool.query("SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id WHERE c.id = ?", [result.insertId]);
+        const [newComment] = await db_1.pool.query(`
+      SELECT 
+        c.id, 
+        c.post_id as postId, 
+        c.user_id as userId, 
+        u.username, 
+        u.avatar_url as avatarUrl,
+        c.content, 
+        c.created_at as createdAt, 
+        c.updated_at as updatedAt
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.id = ?
+      `, [result.insertId]);
         res.status(201).json(newComment[0]);
     }
     catch (error) {
@@ -78,8 +92,21 @@ router.put("/:id", auth_1.verifyToken, async (req, res) => {
         if (rows.length === 0) {
             throw new errors_1.ApiError(404, "评论不存在或无权限修改");
         }
-        await db_1.pool.query("UPDATE comments SET content = ? WHERE id = ?", [content, id]);
-        const [updatedComment] = await db_1.pool.query("SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id WHERE c.id = ?", [id]);
+        await db_1.pool.query("UPDATE comments SET content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [content, id]);
+        const [updatedComment] = await db_1.pool.query(`
+      SELECT 
+        c.id, 
+        c.post_id as postId, 
+        c.user_id as userId, 
+        u.username, 
+        u.avatar_url as avatarUrl,
+        c.content, 
+        c.created_at as createdAt, 
+        c.updated_at as updatedAt
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.id = ?
+      `, [id]);
         res.json(updatedComment[0]);
     }
     catch (error) {
@@ -139,8 +166,10 @@ router.get("/:id/replies", async (req, res) => {
         cr.comment_id as commentId, 
         cr.user_id as userId, 
         u.username, 
+        u.avatar_url as avatarUrl,
         cr.reply_to_user_id as replyToUserId, 
         ru.username as replyToUsername,
+        ru.avatar_url as replyToAvatarUrl,
         cr.content, 
         cr.created_at as createdAt, 
         cr.updated_at as updatedAt
@@ -173,8 +202,10 @@ router.post("/:id/replies", auth_1.verifyToken, async (req, res) => {
         cr.comment_id as commentId, 
         cr.user_id as userId, 
         u.username, 
+        u.avatar_url as avatarUrl,
         cr.reply_to_user_id as replyToUserId, 
         ru.username as replyToUsername,
+        ru.avatar_url as replyToAvatarUrl,
         cr.content, 
         cr.created_at as createdAt, 
         cr.updated_at as updatedAt

@@ -19,7 +19,7 @@ const storage = multer_1.default.diskStorage({
     },
     filename: (req, file, cb) => {
         // 使用用户ID和时间戳作为文件名
-        const userId = req.user?.id;
+        const userId = req.user?.id || Date.now();
         const ext = path_1.default.extname(file.originalname);
         cb(null, `avatar_${userId}_${Date.now()}${ext}`);
     }

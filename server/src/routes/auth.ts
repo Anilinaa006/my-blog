@@ -13,7 +13,8 @@ const router: RouterType = Router();
 
 const registerBody = z.object({
   username: z.string().min(3).max(50),
-  password: z.string().min(8).max(72)
+  password: z.string().min(8).max(72),
+  role: z.enum(['user', 'author']).optional().default('user'),
 });
 
 router.post(
@@ -29,8 +30,8 @@ router.post(
 
     const passwordHash = await bcrypt.hash(body.password, 10);
     const [result]: any = await pool.query(
-      "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-      [body.username, passwordHash]
+      "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
+      [body.username, passwordHash, body.role]
     );
 
     const userId = result.insertId as number;
@@ -55,7 +56,7 @@ router.post(
     const body = loginBody.parse(req.body);
 
     const [rows] = await pool.query<any[]>(
-      "SELECT id, password_hash, avatar_url FROM users WHERE username = ? LIMIT 1",
+      "SELECT id, password_hash, avatar_url, role FROM users WHERE username = ? LIMIT 1",
       [body.username]
     );
     const user = rows[0];
@@ -65,7 +66,7 @@ router.post(
     if (!ok) throw new ApiError(401, "用户名或密码错误");
 
     const token = sign(
-      { sub: user.id as number, username: body.username },
+      { sub: user.id as number, username: body.username, role: user.role },
       env.JWT_SECRET,
       { expiresIn: env.JWT_EXPIRES_IN as any }
     );
@@ -75,7 +76,8 @@ router.post(
       user: { 
         id: user.id as number, 
         username: body.username,
-        avatarUrl: user.avatar_url || null
+        avatarUrl: user.avatar_url || null,
+        role: user.role || 'user'
       }
     });
   })
@@ -89,7 +91,7 @@ router.get(
     const userId = req.user!.id;
 
     const [rows] = await pool.query<any[]>(
-      "SELECT id, username, avatar_url, created_at FROM users WHERE id = ?",
+      "SELECT id, username, avatar_url, role, created_at FROM users WHERE id = ?",
       [userId]
     );
 
@@ -102,6 +104,7 @@ router.get(
       id: user.id,
       username: user.username,
       avatarUrl: user.avatar_url,
+      role: user.role || 'user',
       createdAt: user.created_at
     });
   })
@@ -182,6 +185,64 @@ router.post(
 
     return res.json({
       message: "密码修改成功"
+    });
+  })
+);
+
+const isAuthor = async (userId: number): Promise<boolean> => {
+  const [rows] = await pool.query<any[]>(
+    "SELECT role FROM users WHERE id = ?",
+    [userId]
+  );
+  return rows.length > 0 && rows[0].role === 'author';
+};
+
+router.get(
+  "/users",
+  verifyToken,
+  asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    if (!await isAuthor(userId)) {
+      throw new ApiError(403, "权限不足");
+    }
+
+    const [rows] = await pool.query<any[]>(
+      "SELECT id, username, role, avatar_url as avatarUrl, created_at as createdAt FROM users ORDER BY created_at DESC"
+    );
+
+    return res.json(rows);
+  })
+);
+
+router.delete(
+  "/users/:id",
+  verifyToken,
+  asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    if (!await isAuthor(userId)) {
+      throw new ApiError(403, "权限不足");
+    }
+
+    const targetId = parseInt(req.params.id);
+    if (isNaN(targetId)) {
+      throw new ApiError(400, "无效的用户ID");
+    }
+
+    if (targetId === userId) {
+      throw new ApiError(400, "不能删除自己");
+    }
+
+    const [result]: any = await pool.query(
+      "DELETE FROM users WHERE id = ?",
+      [targetId]
+    );
+
+    if (result.affectedRows === 0) {
+      throw new ApiError(404, "用户不存在");
+    }
+
+    return res.json({
+      message: "用户删除成功"
     });
   })
 );

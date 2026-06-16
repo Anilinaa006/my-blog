@@ -9,6 +9,7 @@ declare global {
       user?: {
         id: number;
         username: string;
+        role?: string;
       };
     }
   }
@@ -26,11 +27,13 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     const decoded = jwt.verify(token, env.JWT_SECRET) as unknown as {
       sub: number;
       username: string;
+      role?: string;
     };
 
     req.user = {
       id: decoded.sub,
-      username: decoded.username
+      username: decoded.username,
+      role: decoded.role
     };
     next();
   } catch (error: any) {

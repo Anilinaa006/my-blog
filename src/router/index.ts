@@ -32,6 +32,11 @@ const routes: Array<RouteRecordRaw> = [
     name: "Settings",
     component: () => import("../views/Settings.vue"),
   },
+  {
+    path: "/users",
+    name: "UserManagement",
+    component: () => import("../views/UserManagement.vue"),
+  },
 ];
 
 const router = createRouter({

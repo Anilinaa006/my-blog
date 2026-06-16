@@ -94,7 +94,17 @@
                   <el-avatar :size="32" :src="getCommentAvatar(comment)">
                     {{ getDefaultAvatarText(comment.username) }}
                   </el-avatar>
-                  <span class="username">{{ comment.username }}</span>
+                  <div class="user-info">
+                    <span class="username">{{ comment.username }}</span>
+                    <el-tag
+                      v-if="comment.role === 'author'"
+                      type="danger"
+                      size="small"
+                      class="author-tag"
+                    >
+                      作者
+                    </el-tag>
+                  </div>
                 </div>
                 <div class="comment-time">
                   {{ formatCommentDate(comment.createdAt) }}
@@ -115,7 +125,9 @@
               </div>
               <div
                 class="comment-actions"
-                v-if="isLoggedIn && comment.userId === currentUserId"
+                v-if="
+                  isLoggedIn && (comment.userId === currentUserId || isAuthor)
+                "
               >
                 <el-button size="small" @click="handleEditComment(comment)">
                   <el-icon><Edit /></el-icon>
@@ -202,6 +214,14 @@
                       {{ getDefaultAvatarText(reply.username) }}
                     </el-avatar>
                     <span class="reply-username">{{ reply.username }}</span>
+                    <el-tag
+                      v-if="reply.role === 'author'"
+                      type="danger"
+                      size="small"
+                      class="author-tag"
+                    >
+                      作者
+                    </el-tag>
                     <span v-if="reply.replyToUsername" class="reply-to">
                       回复 {{ reply.replyToUsername }}
                     </span>
@@ -270,6 +290,10 @@ const isLoggedIn = computed(() => authAPI.isLoggedIn());
 const currentUserId = computed(() => {
   const user = authAPI.getUser();
   return user ? user.id : null;
+});
+const isAuthor = computed(() => {
+  const user = authAPI.getUser();
+  return user ? user.role === "author" : false;
 });
 
 const loadPost = async () => {
@@ -1353,6 +1377,10 @@ onMounted(() => {
   margin-bottom: 0.5rem;
 }
 
+.author-tag {
+  margin-left: 0.5rem;
+}
+
 .reply-username {
   font-weight: 600;
   color: #333;
@@ -1472,14 +1500,27 @@ onMounted(() => {
 /* Visual refresh overrides */
 .post-detail-container {
   background:
-    linear-gradient(180deg, rgba(244, 248, 255, 0.94) 0%, #f7faff 42%, #eef5ff 100%),
-    radial-gradient(circle at 15% 12%, rgba(64, 158, 255, 0.12), transparent 32%);
+    linear-gradient(
+      180deg,
+      rgba(244, 248, 255, 0.94) 0%,
+      #f7faff 42%,
+      #eef5ff 100%
+    ),
+    radial-gradient(
+      circle at 15% 12%,
+      rgba(64, 158, 255, 0.12),
+      transparent 32%
+    );
 }
 
 .dark .post-detail-container {
   background:
     linear-gradient(180deg, #151922 0%, #11151d 56%, #141922 100%),
-    radial-gradient(circle at 15% 12%, rgba(64, 158, 255, 0.12), transparent 34%);
+    radial-gradient(
+      circle at 15% 12%,
+      rgba(64, 158, 255, 0.12),
+      transparent 34%
+    );
 }
 
 .fixed-navbar {
@@ -1540,8 +1581,16 @@ onMounted(() => {
   padding: 3.4rem 3rem 2.4rem;
   border-bottom: 1px solid #e7edf7;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 247, 255, 0.96)),
-    radial-gradient(circle at top right, rgba(54, 207, 201, 0.18), transparent 35%);
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(240, 247, 255, 0.96)
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(54, 207, 201, 0.18),
+      transparent 35%
+    );
 }
 
 .post-header::before {
@@ -1556,7 +1605,11 @@ onMounted(() => {
   border-bottom-color: rgba(66, 78, 100, 0.8);
   background:
     linear-gradient(135deg, rgba(31, 36, 49, 0.98), rgba(23, 29, 40, 0.96)),
-    radial-gradient(circle at top right, rgba(45, 212, 191, 0.1), transparent 36%);
+    radial-gradient(
+      circle at top right,
+      rgba(45, 212, 191, 0.1),
+      transparent 36%
+    );
 }
 
 .post-title {

@@ -4,6 +4,8 @@ interface AuthResponse {
   user: {
     id: number;
     username: string;
+    avatarUrl?: string | null;
+    role?: string;
   };
 }
 
@@ -15,6 +17,7 @@ interface LoginData {
 interface RegisterData {
   username: string;
   password: string;
+  role?: string;
 }
 
 type ApiErrorPayload = {
@@ -140,7 +143,12 @@ function getToken(): string | null {
   return localStorage.getItem("auth_token");
 }
 
-function getUser(): { id: number; username: string; avatarUrl?: string } | null {
+function getUser(): {
+  id: number;
+  username: string;
+  avatarUrl?: string;
+  role?: string;
+} | null {
   const userStr = localStorage.getItem("user");
   return userStr ? JSON.parse(userStr) : null;
 }

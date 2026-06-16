@@ -37,6 +37,13 @@
                     <el-icon><Setting /></el-icon>
                     个人设置
                   </el-dropdown-item>
+                  <el-dropdown-item
+                    v-if="user?.role === 'author'"
+                    @click="goToUserManagement"
+                  >
+                    <el-icon><User /></el-icon>
+                    用户管理
+                  </el-dropdown-item>
                   <el-dropdown-item divided @click="handleLogout">
                     <el-icon><SwitchButton /></el-icon>
                     退出登录
@@ -70,7 +77,7 @@
 import { onMounted, onUnmounted, ref, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Setting, SwitchButton } from "@element-plus/icons-vue";
+import { Setting, SwitchButton, User } from "@element-plus/icons-vue";
 import ThemeToggle from "./ThemeToggle.vue";
 import { authAPI } from "../services/api";
 
@@ -159,6 +166,10 @@ const handleLogout = () => {
 
 const goToSettings = () => {
   router.push("/settings");
+};
+
+const goToUserManagement = () => {
+  router.push("/users");
 };
 
 onMounted(() => {

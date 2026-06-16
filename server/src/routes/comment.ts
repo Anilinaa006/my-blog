@@ -22,6 +22,7 @@ router.get("/", async (req: Request, res: Response) => {
         c.user_id as userId, 
         u.username, 
         u.avatar_url as avatarUrl,
+        u.role,
         c.content, 
         c.created_at as createdAt, 
         c.updated_at as updatedAt,
@@ -75,6 +76,7 @@ router.post("/", verifyToken, async (req: Request, res: Response) => {
         c.user_id as userId, 
         u.username, 
         u.avatar_url as avatarUrl,
+        u.role,
         c.content, 
         c.created_at as createdAt, 
         c.updated_at as updatedAt
@@ -130,6 +132,7 @@ router.put("/:id", verifyToken, async (req: Request, res: Response) => {
         c.user_id as userId, 
         u.username, 
         u.avatar_url as avatarUrl,
+        u.role,
         c.content, 
         c.created_at as createdAt, 
         c.updated_at as updatedAt
@@ -151,8 +154,14 @@ router.delete("/:id", verifyToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const userId = req.user!.id;
+    const userRole = req.user!.role;
 
-    // 检查评论是否存在且属于当前用户
+    if (userRole === 'author') {
+      await pool.query("DELETE FROM comments WHERE id = ?", [id]);
+      res.json({ message: "删除成功" });
+      return;
+    }
+
     const [rows] = await pool.query<any[]>(
       "SELECT * FROM comments WHERE id = ? AND user_id = ?",
       [id, userId]
@@ -227,6 +236,7 @@ router.get("/:id/replies", async (req: Request, res: Response) => {
         cr.user_id as userId, 
         u.username, 
         u.avatar_url as avatarUrl,
+        u.role,
         cr.reply_to_user_id as replyToUserId, 
         ru.username as replyToUsername,
         ru.avatar_url as replyToAvatarUrl,
@@ -274,6 +284,7 @@ router.post("/:id/replies", verifyToken, async (req: Request, res: Response) => 
         cr.user_id as userId, 
         u.username, 
         u.avatar_url as avatarUrl,
+        u.role,
         cr.reply_to_user_id as replyToUserId, 
         ru.username as replyToUsername,
         ru.avatar_url as replyToAvatarUrl,
