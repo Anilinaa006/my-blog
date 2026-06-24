@@ -130,6 +130,33 @@
               label-position="top"
               class="auth-form"
             >
+              <el-form-item label="头像（可选）">
+                <div class="avatar-upload-section">
+                  <el-avatar :size="80" :src="previewAvatarUrl">
+                    <User />
+                  </el-avatar>
+                  <el-upload
+                    class="avatar-uploader"
+                    :show-file-list="false"
+                    :on-change="handleAvatarChange"
+                    :on-remove="handleAvatarRemove"
+                    :before-upload="beforeAvatarUpload"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                  >
+                    <el-button
+                      size="small"
+                      type="primary"
+                      class="avatar-upload-btn"
+                    >
+                      <el-icon><Upload /></el-icon>
+                      {{ selectedAvatar ? "更换头像" : "上传头像" }}
+                    </el-button>
+                  </el-upload>
+                  <span v-if="selectedAvatar" class="avatar-hint"
+                    >支持 JPEG、PNG、GIF、WebP，最大 5MB</span
+                  >
+                </div>
+              </el-form-item>
               <el-form-item label="用户名" prop="username">
                 <el-input
                   v-model="registerForm.username"
@@ -171,9 +198,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { reactive, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
+import { Upload, User } from "@element-plus/icons-vue";
 import { authAPI } from "../services/api";
 
 const router = useRouter();
@@ -193,6 +221,48 @@ const registerForm = reactive({
   password: "",
   confirmPassword: "",
 });
+
+const selectedAvatar = ref<File | null>(null);
+const previewAvatarUrl = ref("");
+
+const beforeAvatarUpload = (file: File) => {
+  const isImage = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ].includes(file.type);
+  const isLt5M = file.size / 1024 / 1024 < 5;
+
+  if (!isImage) {
+    ElMessage.error("只支持 JPEG、PNG、GIF、WebP 格式的图片");
+    return false;
+  }
+
+  if (!isLt5M) {
+    ElMessage.error("图片大小不能超过 5MB");
+    return false;
+  }
+
+  return true;
+};
+
+const handleAvatarChange = (uploadFile: any) => {
+  const file = uploadFile.raw;
+  if (!file) return;
+
+  if (!beforeAvatarUpload(file)) {
+    return;
+  }
+
+  selectedAvatar.value = file;
+  previewAvatarUrl.value = URL.createObjectURL(file);
+};
+
+const handleAvatarRemove = () => {
+  selectedAvatar.value = null;
+  previewAvatarUrl.value = "";
+};
 
 const loginRules = {
   username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
@@ -285,11 +355,14 @@ const handleRegister = async () => {
       username: registerForm.username,
       password: registerForm.password,
       role: isAuthor.value ? "author" : "user",
+      avatar: selectedAvatar.value || undefined,
     });
 
     loading.value = false;
     ElMessage.success("注册成功，请登录");
     isLogin.value = true;
+    selectedAvatar.value = null;
+    previewAvatarUrl.value = "";
   } catch (error: any) {
     loading.value = false;
     ElMessage.error(error.message || "注册失败");
@@ -512,6 +585,29 @@ const handleRegister = async () => {
   border-radius: 14px;
   font-size: 1rem;
   font-weight: 700;
+}
+
+.avatar-upload-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar-upload-section :deep(.el-avatar) {
+  border: 2px solid #dce7f6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.avatar-upload-btn {
+  border-radius: 8px;
+}
+
+.avatar-hint {
+  display: block;
+  margin-top: 0.5rem;
+  margin-left: 96px;
+  font-size: 0.78rem;
+  color: #8a96a8;
 }
 
 .dark .auth-showcase {

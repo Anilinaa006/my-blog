@@ -38,6 +38,8 @@ const postModules: Record<string, () => Promise<{ default: string }>> = {
     import("../assets/posts/React/React和ts结合的使用.md?raw"),
   React路由: () => import("../assets/posts/React/React路由.md?raw"),
   webpack原理: () => import("../assets/posts/其他/webpack原理.md?raw"),
+  React常见实习面试题: () =>
+    import("../assets/posts/React/React常见实习面试题.md?raw"),
 };
 
 interface PostModule {

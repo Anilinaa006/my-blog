@@ -1,4 +1,4 @@
-﻿const API_BASE_URL = "/api";
+const API_BASE_URL = "/api";
 interface AuthResponse {
   token: string;
   user: {
@@ -24,6 +24,51 @@ type ApiErrorPayload = {
   error?: string;
   message?: string;
 };
+
+let isRefreshing = false;
+
+async function fetchWithAuth(
+  url: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  const token = getToken();
+
+  const headers: Record<string, string> = {
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (token && !headers.Authorization) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${url}`, {
+    ...options,
+    headers,
+  });
+
+  if (response.status === 401) {
+    const payload = await readResponseData<ApiErrorPayload>(response);
+    const errorMessage = payload?.error || payload?.message || "";
+
+    if (errorMessage.includes("过期") || errorMessage.includes("无效")) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        removeToken();
+
+        const currentPath = window.location.hash.slice(1);
+        if (!currentPath.startsWith("/auth")) {
+          window.location.hash = "#/auth";
+        }
+
+        setTimeout(() => {
+          isRefreshing = false;
+        }, 1000);
+      }
+    }
+  }
+
+  return response;
+}
 
 interface Comment {
   id: number;
@@ -112,13 +157,27 @@ async function login(data: LoginData): Promise<AuthResponse> {
   return payload as AuthResponse;
 }
 
+interface RegisterData {
+  username: string;
+  password: string;
+  role?: string;
+  avatar?: File;
+}
+
 async function register(data: RegisterData): Promise<AuthResponse> {
+  const formData = new FormData();
+  formData.append("username", data.username);
+  formData.append("password", data.password);
+  if (data.role) {
+    formData.append("role", data.role);
+  }
+  if (data.avatar) {
+    formData.append("avatar", data.avatar);
+  }
+
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+    body: formData,
   });
 
   const payload = await readResponseData<AuthResponse>(response);
@@ -168,17 +227,8 @@ function isLoggedIn(): boolean {
 }
 
 async function getUserInfo(): Promise<UserInfo> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
-  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+  const response = await fetchWithAuth("/auth/me", {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   const payload = await readResponseData<UserInfo>(response);
@@ -220,17 +270,10 @@ async function changePassword(
   oldPassword: string,
   newPassword: string,
 ): Promise<{ message: string }> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
-  const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+  const response = await fetchWithAuth("/auth/change-password", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ oldPassword, newPassword }),
   });
@@ -248,15 +291,10 @@ async function changePassword(
 
 async function getComments(postId: string): Promise<Comment[]> {
   try {
-    const token = getToken();
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-    const response = await fetch(`${API_BASE_URL}/comments?postId=${postId}`, {
-      headers,
+    const response = await fetchWithAuth(`/comments?postId=${postId}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     const payload = await readResponseData<Comment[]>(response);
 
@@ -276,17 +314,10 @@ async function createComment(
   postId: string,
   content: string,
 ): Promise<Comment> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
-  const response = await fetch(`${API_BASE_URL}/comments`, {
+  const response = await fetchWithAuth("/comments", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ postId, content }),
   });
@@ -310,17 +341,10 @@ async function updateComment(
   commentId: number,
   content: string,
 ): Promise<Comment> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
-  const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+  const response = await fetchWithAuth(`/comments/${commentId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ content }),
   });
@@ -341,19 +365,12 @@ async function updateComment(
 }
 
 async function deleteComment(commentId: number): Promise<{ message: string }> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
   const user = getUser();
 
-  const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+  const response = await fetchWithAuth(`/comments/${commentId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ userId: user?.id }),
   });
@@ -370,19 +387,12 @@ async function deleteComment(commentId: number): Promise<{ message: string }> {
 }
 
 async function likeComment(commentId: number): Promise<LikeResponse> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
   const user = getUser();
 
-  const response = await fetch(`${API_BASE_URL}/comments/${commentId}/like`, {
+  const response = await fetchWithAuth(`/comments/${commentId}/like`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ userId: user?.id }),
   });
@@ -403,19 +413,12 @@ async function likeComment(commentId: number): Promise<LikeResponse> {
 }
 
 async function unlikeComment(commentId: number): Promise<LikeResponse> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
   const user = getUser();
 
-  const response = await fetch(`${API_BASE_URL}/comments/${commentId}/like`, {
+  const response = await fetchWithAuth(`/comments/${commentId}/like`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ userId: user?.id }),
   });
@@ -436,19 +439,11 @@ async function unlikeComment(commentId: number): Promise<LikeResponse> {
 }
 
 async function getCommentReplies(commentId: number): Promise<CommentReply[]> {
-  const token = getToken();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  const response = await fetch(
-    `${API_BASE_URL}/comments/${commentId}/replies`,
-    {
-      headers,
+  const response = await fetchWithAuth(`/comments/${commentId}/replies`, {
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+  });
   const payload = await readResponseData<CommentReply[]>(response);
 
   if (!response.ok) {
@@ -465,29 +460,19 @@ async function createReply(
   content: string,
   replyToUserId?: number,
 ): Promise<CommentReply> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
   const user = getUser();
 
-  const response = await fetch(
-    `${API_BASE_URL}/comments/${commentId}/replies`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        userId: user?.id,
-        content,
-        replyToUserId: replyToUserId || null,
-      }),
+  const response = await fetchWithAuth(`/comments/${commentId}/replies`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({
+      userId: user?.id,
+      content,
+      replyToUserId: replyToUserId || null,
+    }),
+  });
 
   const payload = await readResponseData<CommentReply>(response);
 
@@ -505,22 +490,12 @@ async function createReply(
 }
 
 async function likeReply(replyId: number): Promise<LikeResponse> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
-  const response = await fetch(
-    `${API_BASE_URL}/comments/replies/${replyId}/like`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+  const response = await fetchWithAuth(`/comments/replies/${replyId}/like`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+  });
 
   const payload = await readResponseData<LikeResponse>(response);
 
@@ -534,22 +509,12 @@ async function likeReply(replyId: number): Promise<LikeResponse> {
 }
 
 async function unlikeReply(replyId: number): Promise<LikeResponse> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
-  const response = await fetch(
-    `${API_BASE_URL}/comments/replies/${replyId}/like`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+  const response = await fetchWithAuth(`/comments/replies/${replyId}/like`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+  });
 
   const payload = await readResponseData<LikeResponse>(response);
 
@@ -566,17 +531,10 @@ async function updateReply(
   replyId: number,
   content: string,
 ): Promise<CommentReply> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
-  const response = await fetch(`${API_BASE_URL}/comments/replies/${replyId}`, {
+  const response = await fetchWithAuth(`/comments/replies/${replyId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ content }),
   });
@@ -593,17 +551,10 @@ async function updateReply(
 }
 
 async function deleteReply(replyId: number): Promise<void> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("请先登录");
-  }
-
-  const response = await fetch(`${API_BASE_URL}/comments/replies/${replyId}`, {
+  const response = await fetchWithAuth(`/comments/replies/${replyId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
   });
 

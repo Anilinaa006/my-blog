@@ -19,6 +19,7 @@ const registerBody = z.object({
 
 router.post(
   "/register",
+  upload.single("avatar"),
   asyncHandler(async (req, res) => {
     const body = registerBody.parse(req.body);
 
@@ -29,21 +30,24 @@ router.post(
     if (existing.length > 0) throw new ApiError(409, "用户名已存在");
 
     const passwordHash = await bcrypt.hash(body.password, 10);
+    
+    const avatarUrl = req.file ? `/uploads/avatars/${req.file.filename}` : null;
+    
     const [result]: any = await pool.query(
-      "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
-      [body.username, passwordHash, body.role]
+      "INSERT INTO users (username, password_hash, role, avatar_url) VALUES (?, ?, ?, ?)",
+      [body.username, passwordHash, body.role, avatarUrl]
     );
 
     const userId = result.insertId as number;
     const token = sign(
-      { sub: userId, username: body.username },
+      { sub: userId, username: body.username, role: body.role },
       env.JWT_SECRET,
       { expiresIn: env.JWT_EXPIRES_IN as any }
     );
 
     return res.json({
       token,
-      user: { id: userId, username: body.username }
+      user: { id: userId, username: body.username, avatarUrl, role: body.role }
     });
   })
 );
