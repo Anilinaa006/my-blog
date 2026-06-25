@@ -5,10 +5,7 @@
         <div class="profile-hero">
           <div class="avatar-panel">
             <div class="avatar-frame">
-              <el-avatar
-                :size="116"
-                :src="authorAvatarUrl"
-              >
+              <el-avatar :size="116" :src="authorAvatarUrl">
                 <User />
               </el-avatar>
             </div>
@@ -62,7 +59,8 @@
               我来自东华理工大学软件工程专业，对页面交互、组件设计、状态管理和工程化工具链很感兴趣。
             </p>
             <p>
-              目前主要围绕 Vue、React、TypeScript、CSS、网络基础和前端工程化做学习整理，
+              目前主要围绕
+              Vue、React、TypeScript、CSS、网络基础和前端工程化做学习整理，
               也会把日常开发中遇到的问题写成更容易复盘的文章。
             </p>
           </article>
@@ -104,7 +102,9 @@
         </div>
 
         <div class="about-actions">
-          <el-button type="primary" round @click="handleContact">联系我</el-button>
+          <el-button type="primary" round @click="handleContact"
+            >联系我</el-button
+          >
         </div>
       </section>
     </el-main>
@@ -144,9 +144,12 @@ const uploadHeaders = computed(() => {
 });
 
 const beforeUpload = (file: File) => {
-  const isImage = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
-    file.type,
-  );
+  const isImage = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ].includes(file.type);
   const isLt5M = file.size / 1024 / 1024 < 5;
 
   if (!isImage) {
@@ -212,8 +215,16 @@ onMounted(() => {
 .about-container {
   min-height: calc(100vh - 60px);
   background:
-    linear-gradient(135deg, rgba(250, 252, 255, 0.98), rgba(239, 246, 255, 0.96)),
-    radial-gradient(circle at 8% 16%, rgba(255, 138, 101, 0.2), transparent 30%),
+    linear-gradient(
+      135deg,
+      rgba(250, 252, 255, 0.98),
+      rgba(239, 246, 255, 0.96)
+    ),
+    radial-gradient(
+      circle at 8% 16%,
+      rgba(255, 138, 101, 0.2),
+      transparent 30%
+    ),
     radial-gradient(circle at 90% 8%, rgba(54, 207, 201, 0.18), transparent 28%);
 }
 
@@ -246,8 +257,7 @@ onMounted(() => {
   min-height: 320px;
   padding: 1.4rem;
   border-radius: 28px;
-  background:
-    linear-gradient(160deg, #ff8a65 0%, #ffb36d 48%, #36cfc9 100%);
+  background: linear-gradient(160deg, #ff8a65 0%, #ffb36d 48%, #36cfc9 100%);
   color: #fff;
 }
 
@@ -468,7 +478,11 @@ onMounted(() => {
 .dark .about-container {
   background:
     linear-gradient(135deg, #121722 0%, #151a24 52%, #10141c 100%),
-    radial-gradient(circle at 8% 16%, rgba(255, 138, 101, 0.12), transparent 32%),
+    radial-gradient(
+      circle at 8% 16%,
+      rgba(255, 138, 101, 0.12),
+      transparent 32%
+    ),
     radial-gradient(circle at 90% 8%, rgba(54, 207, 201, 0.1), transparent 30%);
 }
 

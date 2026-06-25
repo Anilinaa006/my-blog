@@ -2,27 +2,26 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// 确保uploads目录存在
-const uploadsDir = path.join(process.cwd(), "uploads", "avatars");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+const projectRoot = path.dirname(process.cwd());
+const avatarsDir = path.join(projectRoot, "uploads", "avatars");
+const commentsDir = path.join(projectRoot, "uploads", "comments");
+
+console.log("[upload] projectRoot:", projectRoot);
+console.log("[upload] commentsDir:", commentsDir);
+
+if (!fs.existsSync(avatarsDir)) {
+  fs.mkdirSync(avatarsDir, { recursive: true });
 }
 
-// multer配置
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    // 使用用户ID和时间戳作为文件名
-    const userId = (req as any).user?.id || Date.now();
-    const ext = path.extname(file.originalname);
-    cb(null, `avatar_${userId}_${Date.now()}${ext}`);
-  }
-});
+if (!fs.existsSync(commentsDir)) {
+  fs.mkdirSync(commentsDir, { recursive: true });
+}
 
-// 文件过滤器 - 只允许图片
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (
+  req: any,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback,
+) => {
   const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
@@ -31,10 +30,40 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   }
 };
 
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, avatarsDir);
+  },
+  filename: (req, file, cb) => {
+    const userId = (req as any).user?.id || Date.now();
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar_${userId}_${Date.now()}${ext}`);
+  },
+});
+
+const commentStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, commentsDir);
+  },
+  filename: (req, file, cb) => {
+    const userId = (req as any).user?.id || Date.now();
+    const ext = path.extname(file.originalname);
+    cb(null, `comment_${userId}_${Date.now()}${ext}`);
+  },
+});
+
 export const upload = multer({
-  storage,
+  storage: avatarStorage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 最大5MB
-  }
+    fileSize: 5 * 1024 * 1024,
+  },
+});
+
+export const commentUpload = multer({
+  storage: commentStorage,
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
 });

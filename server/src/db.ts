@@ -10,7 +10,7 @@ export const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  charset: "utf8mb4"
+  charset: "utf8mb4",
 });
 
 export const initSchema = async () => {
@@ -32,6 +32,7 @@ export const initSchema = async () => {
       post_id VARCHAR(255) NOT NULL,
       user_id BIGINT NOT NULL,
       content TEXT NOT NULL,
+      images JSON NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NULL,
       CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -39,6 +40,14 @@ export const initSchema = async () => {
       INDEX idx_user_id (user_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+
+  await pool
+    .query(
+      `
+    ALTER TABLE comments ADD COLUMN images JSON NULL;
+  `,
+    )
+    .catch(() => {});
 
   // comment_likes: 评论点赞
   await pool.query(`
@@ -63,6 +72,7 @@ export const initSchema = async () => {
       user_id BIGINT NOT NULL,
       reply_to_user_id BIGINT NULL,
       content TEXT NOT NULL,
+      images JSON NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NULL,
       CONSTRAINT fk_comment_replies_comment FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
@@ -73,6 +83,14 @@ export const initSchema = async () => {
       INDEX idx_comment_replies_reply_to (reply_to_user_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+
+  await pool
+    .query(
+      `
+    ALTER TABLE comment_replies ADD COLUMN images JSON NULL;
+  `,
+    )
+    .catch(() => {});
 
   // comment_reply_likes: 回复点赞
   await pool.query(`

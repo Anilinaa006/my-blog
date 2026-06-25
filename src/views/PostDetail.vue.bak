@@ -1,5 +1,4 @@
-﻿﻿
-<template>
+﻿<template>
   <el-container class="post-detail-container">
     <div class="fixed-navbar">
       <div class="navbar-content">
@@ -114,7 +113,6 @@
                 </div>
                 <EmojiPicker
                   v-if="showEmojiPicker"
-                  position="above"
                   @select="handleEmojiSelect"
                   @close="showEmojiPicker = false"
                 />
@@ -225,7 +223,7 @@
                       class="tool-btn"
                       @click="showEditEmojiPicker = !showEditEmojiPicker"
                     >
-                      <span class="emoji-icon">😊</span>
+                      <el-icon><Smile /></el-icon>
                     </div>
                     <label class="tool-btn">
                       <el-icon><Picture /></el-icon>
@@ -285,70 +283,20 @@
                 class="reply-form"
                 v-if="replyingCommentId === comment.id && isLoggedIn"
               >
-                <div class="reply-input-wrapper">
-                  <div class="comment-tools">
-                    <div
-                      class="tool-btn"
-                      @click="showReplyEmojiPicker = !showReplyEmojiPicker"
-                    >
-                      <span class="emoji-icon">😊</span>
-                    </div>
-                    <label class="tool-btn">
-                      <el-icon><Picture /></el-icon>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/jpeg,image/png,image/gif,image/webp"
-                        class="file-input"
-                        @change="handleReplyImageUpload"
-                      />
-                    </label>
-                  </div>
-                  <el-input
-                    v-model="replyContentMap[comment.id]"
-                    type="textarea"
-                    :rows="2"
-                    placeholder="输入回复内容"
-                    maxlength="500"
-                    show-word-limit
-                  />
-                  <div
-                    v-if="showReplyEmojiPicker"
-                    class="emoji-picker-wrapper"
-                    @click.stop
-                  >
-                    <EmojiPicker
-                      @select="handleReplyEmojiSelect"
-                      @close="showReplyEmojiPicker = false"
-                    />
-                  </div>
-                  <div
-                    class="comment-image-preview"
-                    v-if="replyImages.length > 0"
-                  >
-                    <div
-                      v-for="(image, index) in replyImages"
-                      :key="index"
-                      class="preview-item"
-                    >
-                      <img :src="image.url" alt="预览" class="preview-img" />
-                      <div
-                        class="preview-remove"
-                        @click="removeReplyImage(index)"
-                      >
-                        <el-icon><Close /></el-icon>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <el-input
+                  v-model="replyContentMap[comment.id]"
+                  type="textarea"
+                  :rows="2"
+                  placeholder="输入回复内容"
+                  maxlength="500"
+                  show-word-limit
+                />
                 <div class="reply-form-actions">
                   <el-button
                     size="small"
                     @click="
                       replyingCommentId = null;
                       replyContentMap[comment.id] = '';
-                      replyImages = [];
-                      showReplyEmojiPicker = false;
                     "
                   >
                     取消
@@ -394,23 +342,6 @@
                   </div>
                   <div class="reply-content" v-if="editingReplyId !== reply.id">
                     {{ reply.content }}
-                  </div>
-                  <div
-                    v-if="
-                      reply.images &&
-                      reply.images.length > 0 &&
-                      editingReplyId !== reply.id
-                    "
-                    class="reply-images"
-                  >
-                    <img
-                      v-for="(image, index) in reply.images"
-                      :key="index"
-                      :src="getImageUrl(image)"
-                      alt="回复图片"
-                      class="reply-image"
-                      @click="previewImage(image)"
-                    />
                   </div>
                   <div
                     class="edit-reply-form"
@@ -538,8 +469,6 @@ const submittingReplyId = ref<number | null>(null);
 const replyToReply = ref<any>(null);
 const showEmojiPicker = ref(false);
 const commentImages = ref<{ url: string; file: File }[]>([]);
-const showReplyEmojiPicker = ref(false);
-const replyImages = ref<{ url: string; file: File }[]>([]);
 
 const isLoggedIn = computed(() => authAPI.isLoggedIn());
 const currentUserId = computed(() => {
@@ -623,11 +552,11 @@ const handleSubmitComment = async () => {
   try {
     submittingComment.value = true;
     const postId = route.params.id as string;
-    const newImages = commentImages.value.map((item) => item.file);
+    const images = commentImages.value.map((item) => item.file);
     const newComment = await commentAPI.createComment(
       postId,
       commentContent.value,
-      newImages.length > 0 ? newImages : undefined,
+      images.length > 0 ? images : undefined,
     );
     comments.value.unshift(newComment);
     commentContent.value = "";
@@ -646,24 +575,14 @@ const handleEmojiSelect = (emoji: string) => {
   commentContent.value += emoji;
 };
 
-const handleReplyEmojiSelect = (emoji: string) => {
-  if (replyingCommentId.value === null) return;
-  const commentId = replyingCommentId.value;
-  if (!replyContentMap[commentId]) {
-    replyContentMap[commentId] = "";
-  }
-  replyContentMap[commentId] += emoji;
-};
-
 const handleImageUpload = (event: any) => {
   const files = event.target.files;
   if (!files || files.length === 0) return;
 
   const maxRemaining = 9 - commentImages.value.length;
-  const filesToAdd = Array.from(files) as File[];
-  const slicedFiles = filesToAdd.slice(0, maxRemaining);
+  const filesToAdd = Array.from(files).slice(0, maxRemaining);
 
-  slicedFiles.forEach((file: File) => {
+  filesToAdd.forEach((file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       commentImages.value.push({
@@ -706,10 +625,9 @@ const handleEditImageUpload = (event: any) => {
   if (!files || files.length === 0) return;
 
   const maxRemaining = 9 - editCommentImages.value.length;
-  const filesToAdd = Array.from(files) as File[];
-  const slicedFiles = filesToAdd.slice(0, maxRemaining);
+  const filesToAdd = Array.from(files).slice(0, maxRemaining);
 
-  slicedFiles.forEach((file: File) => {
+  filesToAdd.forEach((file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       editCommentImages.value.push({
@@ -738,11 +656,10 @@ const submitEditComment = async (commentId: number) => {
 
   try {
     editingComment.value = true;
-    const newImages = editCommentImages.value
+    const images = editCommentImages.value
       .filter((item) => item.file)
       .map((item) => item.file!);
-
-    const currentExistingImages = editCommentImages.value
+    const removeImages = editCommentImages.value
       .filter((item) => !item.file)
       .map((item) => {
         if (item.url.startsWith("/")) {
@@ -752,15 +669,11 @@ const submitEditComment = async (commentId: number) => {
         return match ? match[0] : item.url;
       });
 
-    const removedImages = originalEditImages.value.filter(
-      (img) => !currentExistingImages.includes(img),
-    );
-
     const updatedComment = await commentAPI.updateComment(
       commentId,
       editCommentContent.value,
-      newImages.length > 0 ? newImages : undefined,
-      removedImages.length > 0 ? removedImages : undefined,
+      images.length > 0 ? images : undefined,
+      removeImages.length > 0 ? removeImages : undefined,
     );
     const index = comments.value.findIndex((c) => c.id === commentId);
     if (index !== -1) {
@@ -943,61 +856,29 @@ const toggleReplyForm = (commentId: number, reply?: any) => {
   if (replyingCommentId.value === commentId) {
     replyingCommentId.value = null;
     replyToReply.value = null;
-    replyImages.value = [];
-    showReplyEmojiPicker.value = false;
   } else {
     replyingCommentId.value = commentId;
     replyToReply.value = reply || null;
     if (!replyContentMap[commentId]) {
       replyContentMap[commentId] = "";
     }
-    replyImages.value = [];
-    showReplyEmojiPicker.value = false;
   }
-};
-
-const handleReplyImageUpload = (event: any) => {
-  const files = event.target.files;
-  if (!files || files.length === 0) return;
-
-  const maxRemaining = 9 - replyImages.value.length;
-  const filesToAdd = Array.from(files) as File[];
-  const slicedFiles = filesToAdd.slice(0, maxRemaining);
-
-  slicedFiles.forEach((file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      replyImages.value.push({
-        url: e.target?.result as string,
-        file: file,
-      });
-    };
-    reader.readAsDataURL(file);
-  });
-
-  event.target.value = "";
-};
-
-const removeReplyImage = (index: number) => {
-  replyImages.value.splice(index, 1);
 };
 
 const handleSubmitReply = async (commentId: number) => {
   const content = replyContentMap[commentId];
-  if (!content.trim() && replyImages.value.length === 0) {
-    ElMessage.warning("请输入回复内容或上传图片");
+  if (!content.trim()) {
+    ElMessage.warning("请输入回复内容");
     return;
   }
 
   try {
     submittingReplyId.value = commentId;
     const replyToUserId = replyToReply.value?.userId || undefined;
-    const newImages = replyImages.value.map((item) => item.file);
     const newReply = await commentAPI.createReply(
       commentId,
       content,
       replyToUserId,
-      newImages.length > 0 ? newImages : undefined,
     );
 
     const replies = commentReplies.value.get(commentId) || [];
@@ -1005,8 +886,6 @@ const handleSubmitReply = async (commentId: number) => {
     commentReplies.value.set(commentId, replies);
 
     replyContentMap[commentId] = "";
-    replyImages.value = [];
-    showReplyEmojiPicker.value = false;
     replyingCommentId.value = null;
     replyToReply.value = null;
     ElMessage.success("回复成功");
@@ -1833,31 +1712,6 @@ onMounted(() => {
   border-top: 1px solid #e9ecef;
 }
 
-.edit-comment-form .comment-input-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: flex-start;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  border-radius: 0;
-}
-
-.emoji-picker-wrapper {
-  position: relative;
-}
-
-.reply-input-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: flex-start;
-}
-
 .dark .edit-comment-form {
   border-top-color: #303030;
 }
@@ -2341,7 +2195,6 @@ onMounted(() => {
 }
 
 .comment-input-wrapper {
-  position: relative;
   display: flex;
   gap: 0.8rem;
   align-items: flex-end;
@@ -2577,27 +2430,6 @@ onMounted(() => {
 }
 
 .comment-image:hover {
-  transform: scale(1.05);
-}
-
-.reply-images {
-  margin: 0.5rem 0 0.5rem 2.3rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.reply-image {
-  width: 60px;
-  height: 60px;
-  border-radius: 6px;
-  object-fit: cover;
-  cursor: pointer;
-  border: 1px solid #e8eef7;
-  transition: transform 0.2s;
-}
-
-.reply-image:hover {
   transform: scale(1.05);
 }
 
@@ -2839,3 +2671,4 @@ onMounted(() => {
   }
 }
 </style>
+

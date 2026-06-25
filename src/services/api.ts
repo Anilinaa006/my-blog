@@ -76,6 +76,7 @@ interface Comment {
   userId: number;
   username: string;
   content: string;
+  images: string[];
   createdAt: string;
   updatedAt: string | null;
   likeCount: number;
@@ -92,6 +93,7 @@ interface CommentReply {
   replyToUserId: number | null;
   replyToUsername: string | null;
   content: string;
+  images: string[];
   createdAt: string;
   updatedAt: string | null;
   likeCount: number;
@@ -313,16 +315,34 @@ async function getComments(postId: string): Promise<Comment[]> {
 async function createComment(
   postId: string,
   content: string,
+  images?: File[],
 ): Promise<Comment> {
+  const formData = new FormData();
+  formData.append("postId", postId);
+  formData.append("content", content);
+
+  if (images) {
+    images.forEach((image) => {
+      formData.append("images", image);
+    });
+  }
+
+  console.log("[api] createComment:", {
+    postId,
+    content,
+    imagesCount: images?.length,
+  });
+  console.log("[api] formData entries:", Array.from(formData.entries()));
+
   const response = await fetchWithAuth("/comments", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ postId, content }),
+    body: formData,
+    headers: {},
   });
 
   const payload = await readResponseData<Comment>(response);
+
+  console.log("[api] createComment response:", payload);
 
   if (!response.ok) {
     throw new Error(
@@ -340,13 +360,26 @@ async function createComment(
 async function updateComment(
   commentId: number,
   content: string,
+  images?: File[],
+  removeImages?: string[],
 ): Promise<Comment> {
+  const formData = new FormData();
+  formData.append("content", content);
+
+  if (images) {
+    images.forEach((image) => {
+      formData.append("images", image);
+    });
+  }
+
+  if (removeImages && removeImages.length > 0) {
+    formData.append("removeImages", JSON.stringify(removeImages));
+  }
+
   const response = await fetchWithAuth(`/comments/${commentId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ content }),
+    body: formData,
+    headers: {},
   });
 
   const payload = await readResponseData<Comment>(response);
@@ -459,19 +492,24 @@ async function createReply(
   commentId: number,
   content: string,
   replyToUserId?: number,
+  images?: File[],
 ): Promise<CommentReply> {
-  const user = getUser();
+  const formData = new FormData();
+  formData.append("content", content);
+  if (replyToUserId) {
+    formData.append("replyToUserId", replyToUserId.toString());
+  }
+
+  if (images) {
+    images.forEach((image) => {
+      formData.append("images", image);
+    });
+  }
 
   const response = await fetchWithAuth(`/comments/${commentId}/replies`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userId: user?.id,
-      content,
-      replyToUserId: replyToUserId || null,
-    }),
+    body: formData,
+    headers: {},
   });
 
   const payload = await readResponseData<CommentReply>(response);
@@ -530,13 +568,26 @@ async function unlikeReply(replyId: number): Promise<LikeResponse> {
 async function updateReply(
   replyId: number,
   content: string,
+  images?: File[],
+  removeImages?: string[],
 ): Promise<CommentReply> {
+  const formData = new FormData();
+  formData.append("content", content);
+
+  if (images) {
+    images.forEach((image) => {
+      formData.append("images", image);
+    });
+  }
+
+  if (removeImages && removeImages.length > 0) {
+    formData.append("removeImages", JSON.stringify(removeImages));
+  }
+
   const response = await fetchWithAuth(`/comments/replies/${replyId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ content }),
+    body: formData,
+    headers: {},
   });
 
   const payload = await readResponseData<CommentReply>(response);
