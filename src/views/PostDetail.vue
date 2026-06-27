@@ -1,5 +1,4 @@
-﻿﻿
-<template>
+﻿﻿﻿<template>
   <el-container class="post-detail-container">
     <div class="fixed-navbar">
       <div class="navbar-content">
@@ -1028,7 +1027,7 @@ const getCommentAvatar = (comment: any) => {
     if (url.startsWith("http")) {
       return url;
     }
-    return `http://localhost:3001${url}`;
+    return url;
   }
   return "";
 };

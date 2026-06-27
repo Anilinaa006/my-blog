@@ -20,7 +20,8 @@ app.use(
 app.use(express.json({ limit: "2mb" }));
 
 // 静态文件服务 - 头像图片
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+const projectRoot = path.dirname(process.cwd());
+app.use("/uploads", express.static(path.join(projectRoot, "uploads")));
 
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 
